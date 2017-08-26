@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.vehicleinformation.dao.IResDao">
+	
+   <select id="findResPic" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.ResourceDto">
+         select
+                a.RES_ID   as   "resId",
+                a.RES_URL  as   "repicUrl",
+                a.HD_TIME  as   "hdTime",
+                o.RES_NAME as   "resName"
+          from 
+                RESOURCES a
+     inner join
+                RES_PRO   o
+            on  
+                a.RES_ID = o.RES_ID
+          where 
+                a.SRLN= #{0}   
+             and 
+                a.RCK_COUNT=#{1}
+   
+   </select>
+
+</mapper>

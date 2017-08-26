@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.nvrsetting.dao.IChkptNvrConfigDao">
+	<!-- 查询系统设置当前状态 -->
+	<select id="findChkptNvrConfigs" resultType="com.vkl.ckts.rgsy.system.nvrsetting.entity.ChkptNvrConfigDto">
+	         select
+			     a.ORGAN_CODE       as    "organCode",
+			     a.CHECK_LINE_ID    as    "checkLineId",
+			     a.CHECK_LINE_NAME  as    "checkLineName",
+			     a.NVR_IP           as    "nvrIp",
+			     a.NVR_PORT         as    "nvrPort",
+			     a.NVR_USER         as    "nvrUser",
+			     a.NVR_PWD          as    "nvrPwd",
+			     a.NVR_CHANNEL      as    "nvrChannel",
+			     e.ORGAN_NAME       as    "chkptName",
+			     a.SERV_PORT        as    "servPort",
+			     a.VIDEO_DOWNLOAD_CHANNEL       as    "videoDownLoadChannel"		                  
+	         from 
+	               CHKPT_VIDEO_CONFIG   a 
+	         inner join 
+	               CHKPT_FILE   e
+	               on 
+	                e.ORGAN_CODE  =  a.ORGAN_CODE
+	                
+	         <where>
+	             <if test="organCode !=null and organCode !='' ">
+	                 a.ORGAN_CODE = #{organCode}
+	             </if>
+	         </where> 
+	</select>
+	
+	 <select id="findChNvrConfig" resultType="com.vkl.ckts.rgsy.system.nvrsetting.entity.ChkptNvrConfigDto">
+	       select
+			     a.ORGAN_CODE       as    "organCode",
+			     a.CHECK_LINE_ID    as    "checkLineId",
+			     a.CHECK_LINE_NAME  as    "checkLineName",
+			     a.NVR_IP           as    "nvrIp",
+			     a.NVR_PORT         as    "nvrPort",
+			     a.NVR_USER         as    "nvrUser",
+			     a.NVR_PWD          as    "nvrPwd",
+			     a.NVR_CHANNEL      as    "nvrChannel",
+			      a.SERV_PORT        as    "servPort",
+			     a.VIDEO_DOWNLOAD_CHANNEL       as    "videoDownLoadChannel"		                  
+	         from 
+	               CHKPT_VIDEO_CONFIG   a 
+	               
+	          where  
+	                a.ORGAN_CODE     = #{0}
+	            and
+	                a.CHECK_LINE_ID  = #{1}
+	 </select>
+	
+	
+	
+	<insert id="insertChkptNvrConfig">
+	       insert into
+	              CHKPT_VIDEO_CONFIG
+	              (
+	               ORGAN_CODE,     
+				   CHECK_LINE_ID,  
+				   CHECK_LINE_NAME,
+				   NVR_IP,         
+				   NVR_PORT,       
+				   NVR_USER,       
+				   NVR_PWD,        
+	               NVR_CHANNEL,
+	               SERV_PORT,
+	               VIDEO_DOWNLOAD_CHANNEL
+	              )values(
+	                #{organCode},
+					SEQ_VIDEO_CONFIG.nextval,
+					#{checkLineName},
+					#{nvrIp},
+					#{nvrPort},
+					#{nvrUser},
+					#{nvrPwd},
+					#{nvrChannel},
+					#{servPort},
+					#{videoDownLoadChannel}	   
+	              )
+	
+	</insert>
+	
+	<update id="updateChkptNvrInfo">
+	     update 
+	        CHKPT_VIDEO_CONFIG   a
+	     set
+	        a.ORGAN_CODE       =    #{organCode},
+	        a.CHECK_LINE_ID    =    #{checkLineId},
+	        a.CHECK_LINE_NAME  =    #{checkLineName},
+	        a.NVR_IP           =    #{nvrIp},
+	        a.NVR_PORT         =    #{nvrPort},
+	        a.NVR_USER         =    #{nvrUser},
+	        a.NVR_PWD          =    #{nvrPwd},
+	        a.NVR_CHANNEL      =    #{nvrChannel},
+	        a.SERV_PORT        =    #{servPort},
+			a.VIDEO_DOWNLOAD_CHANNEL   =  #{videoDownLoadChannel}		   
+	    where 
+	      <!--    a.ORGAN_CODE       =    #{organCode}
+	
+	      and  -->
+	         a.CHECK_LINE_ID    =    #{checkLineId}
+	</update>
+	
+	
+	<delete id="deleteChkptLineInfo">
+	     delete from 
+	         CHKPT_VIDEO_CONFIG a
+	     where   
+	         a.ORGAN_CODE       =    #{0}
+	      and 
+	         a.CHECK_LINE_ID    =    #{1}
+	
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	<!-- 根据id查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			<if test="id != null and id != '' ">
+				and ID = #{id}
+			</if>
+		</where>
+	
+	</select>
+	
+		<!-- 查询备案通过的查验区列表 -->
+	<select id="findChkptList" resultType = "com.vkl.ckts.common.entity.ChkptFileEntity">
+		select ORGAN_CODE as "organCode" ,
+			   ORGAN_NAME as "organName" ,
+			   PARENT_DEPT_NAME as "parentDeptName" ,
+			   PARENT_DEPT_ID as "parentDeptId"
+			   from CHKPT_FILE
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL} and AUDIT_FLAG = #{AUDIT_FLAG_NORMAL}
+				<if test="parentDeptId !=null and parentDeptId !=''">
+					and PARENT_DEPT_ID = #{parentDeptId}
+				</if>
+				<if test="organCode !=null and organCode !=''">
+					and ORGAN_CODE = #{organCode}
+				</if>
+			order by ORGAN_CODE desc
+			</where> 
+	
+	</select>
+</mapper>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.checksetting.dao.ICheckSettingDao">
+	<!-- 业务车型查验项目 -->
+	<sql id="checkCount">
+		p.PRO_ID AS "proId",
+		p.CLLX AS "cllx",
+		p.IS_SB AS "isSb",
+		P.OPER_TYPE AS "operType",
+		P.VEH_MOD_PRO AS "vehModPro",
+		p.CARD_TYPE AS "cardType",
+		p.CRT_TIME AS "createDate",
+		p.CRTER AS "creater",
+		p.UPD_TIME AS "updDate",
+		p.UPDER AS "updater",
+		p.DEL_FLAG AS "delFlag"
+		
+	</sql>	
+	<!-- 业务类型 -->
+	<sql id="operTypeColum">
+		o.ID AS "ID",
+		o.TYPE_NAME AS "typeName",
+		o.PARENT_ID AS "parentId",
+		o.OPER_INTR AS "iperIntr",
+		o.PARENT_NAME AS "parentName",
+		o.CRT_TIME AS "createDate",
+		o.CRTER AS "creater",
+		o.UPD_TIME AS "updDate",
+		o.UPDER AS "updater",
+		o.DEL_FLAG AS "delFlag"
+	</sql>
+	<!-- 车辆类型 -->
+	<sql id="ckCllxColum">
+		c.CLLX AS "cllx",
+		c.CLLX_NAME AS "cllxName",
+		c.P_CLLX AS "parentCllx",
+		c.PARENT_NAME AS "parentName"
+	</sql>
+	<!-- 查验项 -->
+	<sql id="ckProjectColum">
+		j.ID AS "id",
+		j.HELP_INTR AS "helpIntr",
+		j.PRO_NAME AS "proName",
+		j.PRO_TYPE AS "proType",
+		j.PRO_CLASS AS "proClass",
+		j.MATCH_FIELD AS "matchField",
+		j.IS_ENABLE AS "isEnable"
+	</sql>
+	<!-- 使用性质 -->
+	<sql id="usering">
+		u.SYXZ AS "syxz",
+		u.SYXZ_NAME AS "syxzName",
+		u.SYXZ_INTR AS "syxzIntr",
+		u.PARENT_ID AS "parentId",
+		u.PARENT_NAME AS "parentName"
+	</sql>
+	<!-- 添加查验项 -->
+	<insert id="insertData" parameterType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		insert into OPER_VEH_PRO(
+			PRO_ID,
+			CLLX,
+			IS_SB,
+			OPER_TYPE,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			VEH_MOD_PRO
+		) values (
+			#{proId},
+			#{cllx},
+			#{isSb},
+			#{operType},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{vehModPro}
+		)
+	</insert>
+	
+	<!-- 查询业务类型 -->
+	<select id="allOperType" resultType="com.vkl.ckts.common.entity.OperTypeEntity">
+		select <include refid="operTypeColum"/> from oper_type o 
+	</select>
+	
+	<!-- 查询车辆类型 -->
+	<select id="allCKCllx" resultType="com.vkl.ckts.common.entity.CkCllxEntity">
+		select  distinct(c.P_CLLX),c.P_CLLX as "parentCllx",c.PARENT_NAME from CK_CLLX c 
+	</select>
+	
+	<!-- 查询车辆类型 -->
+	<select id="allPCKCllx" resultType="com.vkl.ckts.common.entity.CkCllxEntity">
+		select c.CLLX as "cllx",c.CLLX_NAME as "cllxName" from CK_CLLX c 
+	</select>
+	
+	<select id="allCKCllxBy" resultType="com.vkl.ckts.common.entity.CkCllxEntity">
+		select c.CLLX as "cllx",c.CLLX_NAME as "cllxName" from CK_CLLX c where  c.P_CLLX=#{pcllx}
+	</select>
+	
+	
+	<!-- 查验项目查询 -->
+	<select id="allCkProject" resultType="com.vkl.ckts.common.entity.CkProjectEntity">
+		select <include refid="ckProjectColum"/> from ck_project j 
+		<where>
+		
+			<if test="proType != null and proType != ''">
+				j.PRO_TYPE = #{proType}
+			</if>
+			<if test="id != null and id != ''">
+				and j.ID = #{id}
+			</if>
+			<if test="isEnable != null and isEnable != ''">
+			 	and	j.IS_ENABLE = #{isEnable}
+			</if>
+		</where>
+	</select>
+
+	<!-- 查询所有查验项设置 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		select * from(
+			select a.*,rownum as rowno from(
+				select distinct p.OPER_TYPE as "operType",p.CLLX as "cllx",c.parent_name as "parentName",
+						 p.is_sb as "isSb", o.type_name as "typeName",
+						y.parent_name as "syxz"
+				from oper_veh_pro p 
+				inner join ck_cllx c on p.cllx = c.p_cllx
+				inner join oper_type o on o.id = p.oper_type
+ 				inner join ceh_usnr y on y.parent_id = p.is_sb
+				where p.DEL_FLAG = #{t.delFlag}
+				<if test="t.operType !=null and t.operType !=''">
+					and p.OPER_TYPE = #{t.operType}
+				</if>
+				<if test="t.cllx != null and t.cllx !=''">
+					and p.CLLX = #{t.cllx}
+				</if>
+				
+			)a
+			<where>
+				rownum &lt;=#{pageNo} * #{pageSize}
+			</where>
+		)b
+		<where>
+			b.rowno &gt;=(#{pageNo} -1 ) * #{pageSize}
+		</where>
+		
+	</select>
+	
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select distinct p.OPER_TYPE as "operType",p.CLLX as "cllx",c.parent_name as "parentName",
+						 p.is_sb as "isSb", o.type_name as "typeName",
+						y.parent_name as "syxz"
+				from oper_veh_pro p 
+				inner join ck_cllx c on p.cllx = c.p_cllx
+				inner join oper_type o on o.id = p.oper_type
+ 				inner join ceh_usnr y on y.parent_id = p.is_sb
+				where p.DEL_FLAG = #{delFlag}
+				<if test="operType !=null and operType !=''">
+					and p.OPER_TYPE = #{operType}
+				</if>
+				<if test="cllx != null and cllx !=''">
+					and p.CLLX = #{cllx}
+				</if>
+		)
+	</select>
+	<!-- 查询修改查验设置 -->
+	<select id="oneCheckItems" resultType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		select <include refid="checkCount"/> from oper_veh_pro p where p.OPER_TYPE=#{operType} and p.CLLX=#{cllx} and p.is_sb = #{isSb}
+		<!--  select p.* from oper_veh_pro p where p.OPER_TYPE=#{operType} and p.CLLX=#{cllx} -->
+	</select>
+	<update id="updateCheck" parameterType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		 update OPER_VEH_PRO p  SET 
+		p.UPD_TIME = #{updDate},
+		p.UPDER = #{updater}
+		 <where> PRO_ID = #{proId}
+		 </where>
+	</update>
+	
+	<!-- 删除-->
+	<delete id="deleteData" parameterType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		delete oper_veh_pro p <where>
+		 OPER_TYPE=#{operType} and CLLX=#{cllx} and is_sb = #{isSb}
+		 <if test="proId != null and proId !=''"> and p.PRO_ID = #{proId}</if>
+		 </where>
+	</delete>
+	
+	<!-- 查询车辆使用性质 -->
+	<select id="allUsering" resultType="com.vkl.ckts.common.entity.CehUsnrEntity">
+		select distinct (parent_id),parent_id as "parentId" ,parent_Name as "parentName" from ceh_usnr
+	</select>
+	
+	<!-- 唯一性查询-->
+	<select id="onlyCheckItems" resultType="com.vkl.ckts.rgsy.system.checksetting.entity.CheckItem">
+		select <include refid="checkCount"/> from oper_veh_pro p 
+		<where>
+		 OPER_TYPE=#{operType} and CLLX=#{cllx} 
+		 <if test="isSb !=null and isSb != ''">and p.IS_SB = #{isSb}</if>
+		 <if test="proId != null and proId != ''">and p.PRO_ID = #{proId} </if> 
+		 </where>
+	</select>
+		
+	<!-- 根据车辆使用性质的父类id查找父类名字-->
+	<select id="findCehUsnrPNameByPId" resultType="java.lang.String">
+		select parent_name from ceh_usnr t 
+			where t.parent_id= #{parentId} 
+				group by t.parent_name
+	</select>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd">
+	<!-- 启动注解，注册服务，如验证框架、全局类型转换器 -->
+	<mvc:annotation-driven />
+	<context:component-scan base-package="com.vkl.ckts.*"
+		use-default-filters="false" name-generator="com.vkl.ckts.common.utils.AnnotationBeanNameGenerator" >
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+
+	 <mvc:resources mapping="/static/**" location="/static/" />
+	 <mvc:resources mapping="/photo/**" location="/photo/" />
+	 <mvc:resources mapping="/report/**" location="/report/" />
+	  <mvc:resources mapping="/download/**" location="/download/" />
+
+	<bean id="jspViewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html; charset=UTF-8</value>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+				<bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html; charset=UTF-8</value>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+<bean id="multipartResolver"  
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+    </bean> 
+	<mvc:interceptors>
+	  <!--用户session拦截器  -->
+	    <mvc:interceptor>
+	    	<mvc:mapping path="/**"/>
+	    	<bean class="com.vkl.ckts.cksy.base.interceptor.UserSessionInterceptor"></bean>
+	    </mvc:interceptor>
+	    <!--  <mvc:interceptor>
+	    	<mvc:mapping path="/**"/>
+	    	<bean class="com.vkl.ckts.cksy.base.interceptor.UserAuthorityInterceptor"></bean>
+	    </mvc:interceptor> -->
+	</mvc:interceptors> 
+
+</beans>

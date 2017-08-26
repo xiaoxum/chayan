@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.dept.dao.IDeptDao">
+	<sql id="DeptColumns">
+		ID as "id",
+		DEPT_TYPE as "deptType",
+		NVL(DEPT_NAME,' ') as "deptName",
+		PARENT_ID as "parentId",
+		NVL(DEPT_INTR,' ') as "deptIntr",
+		NVL(DEPT_ADDR,' ') as "deptAddr",
+		NVL(DEPT_PHONE,' ') as "deptPhone",
+		NVL(DEPT_EMAIL,' ') as "deptEmail",
+		NVL(DEPT_URL,' ') as "deptUrl",
+		NVL(ASTS,' ') as "asts",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		IS_FILE_DEPT as "isFileDept",
+		FILE_ID as "fileId"
+	</sql>
+	
+	<!--根据父类id查找部门  -->
+	<select id="findSubDeptByParentId" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select <include refid="DeptColumns"></include> from DEPT 
+		where DEL_FLAG = #{DEL_FLAG_NORMAL} and PARENT_ID = #{parentId} and DEPT_TYPE != #{DEPT_TYPE_CHECK_OFFICE}
+	</select>
+	
+	<!--查找所有部门  -->
+	<select id="findAllDeptByParentId" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select <include refid="DeptColumns"></include> from DEPT 
+		where DEL_FLAG = #{DEL_FLAG_NORMAL} and PARENT_ID = #{parentId} 
+	</select>
+	
+	<!-- 添加部门 -->
+	<insert id="addDept">
+		insert into DEPT(
+			ID ,
+			DEPT_TYPE ,
+			DEPT_NAME ,
+			PARENT_ID ,
+			DEPT_INTR ,
+			DEPT_ADDR ,
+			DEPT_PHONE ,
+			DEPT_EMAIL ,
+			DEPT_URL ,
+			ASTS ,
+			CRT_TIME ,
+			CRTER ,
+			UPD_TIME ,
+			UPDER ,
+			DEL_FLAG ,
+			IS_FILE_DEPT ,
+			FILE_ID 
+		)values(
+			seq_dept.nextval,
+			#{deptType},
+			#{deptName},
+			#{parentId},
+			#{deptIntr},
+			#{deptAddr},
+			#{deptPhone},
+			#{deptEmail},
+			#{deptUrl},
+			#{asts},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{isFileDept},
+			#{fileId}
+		)
+	</insert>
+	
+	<!-- 查找部门 -->
+	<select id="findDept" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			<!-- DEL_FLAG = #{DEL_FLAG_NORMAL} -->
+			<if test="fileId != null and fileId != '' ">
+				and FILE_ID = #{fileId}
+				and IS_FILE_DEPT=1
+			</if>
+			<if test="id != null and id != '' ">
+				and ID = #{id}
+			</if>
+			<if test="deptName != null and deptName != '' ">
+				and DEPT_NAME = #{deptName}
+			</if>
+		</where>
+	
+	</select>
+		
+	<!-- 根据id查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="id != null and id != '' ">
+				and ID = #{id}
+			</if>
+		</where>
+	
+	</select>
+				
+	<!-- 查找删除部门 -->
+	<select id="findDeleteDept" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			DEL_FLAG = #{DEL_FLAG_DELETE}
+			<if test="deptName != null and deptName != '' ">
+				and DEPT_NAME = #{deptName}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 恢复删除的部门 -->
+	<update id="recoverDeleteDept" parameterType="com.vkl.ckts.common.entity.DeptEntity">
+		update DEPT set 
+			DEL_FLAG = #{DEL_FLAG_NORMAL} , 
+			UPD_TIME = #{updDate},
+			UPDER = #{updater}
+		<where>
+			<if test="deptName != null and deptName != '' ">
+				and DEPT_NAME = #{deptName}
+			</if>
+		</where>
+	</update>
+	
+	<!-- 分页查询部门信息 -->
+	<select id="pageDept" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select <include refid="DeptColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from DEPT 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.deptType != null and t.deptType != ''">
+						and DEPT_TYPE = #{t.deptType}
+					</if>
+					<if test = "t.deptName != null and t.deptName != ''">
+						and DEPT_NAME like '%'||#{t.deptName}||'%'
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询部门信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.DeptEntity" resultType="Integer">
+		select count(1) from DEPT
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test = "deptType != null and deptType != ''">
+				and DEPT_TYPE = #{deptType}
+			</if>
+			<if test = "deptName != null and deptName != ''">
+				and DEPT_NAME like '%'||#{deptName}||'%'
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据部门编号逻辑删除部门信息 -->
+	<select id="deleteDeptById" parameterType="com.vkl.ckts.common.entity.DeptEntity">
+		update DEPT 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+			
+		<!-- delete from DEPT where ID=#{id}	 -->
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updateDept" parameterType="com.vkl.ckts.common.entity.DeptEntity">
+		update DEPT
+		set	DEPT_TYPE = #{deptType},
+			DEPT_NAME = #{deptName},
+			PARENT_ID = #{parentId},
+			DEPT_INTR = #{deptIntr},
+			DEPT_ADDR = #{deptAddr},
+			DEPT_PHONE = #{deptPhone},
+			DEPT_EMAIL = #{deptEmail},
+			DEPT_URL = #{deptUrl},
+			ASTS = #{asts},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			IS_FILE_DEPT = #{isFileDept},
+			FILE_ID = #{fileId}
+		where ID = #{id}
+	</update>
+	
+	<!-- 物理删除部门信息 -->
+	<delete id="physicsDeleteDept" parameterType="com.vkl.ckts.common.entity.DeptEntity">
+		delete from DEPT where DEPT_NAME = #{deptName}
+	</delete>
+	
+	
+	<select id="findDeptInfoByDept">
+	     select 
+	      <include refid="DeptColumns"></include>
+	     from 
+	       DEPT
+	       WHERE ID='0'
+	      START WITH ID =#{0} CONNECT BY PARENT_ID=PRIOR ID
+	</select>
+	
+</mapper>

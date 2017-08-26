@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IChApplItemDao">
+	<sql id="OperApplColumns">
+		
+	</sql>
+	
+	
+	
+	
+	<!-- 添加变更登记申请（和注册是一个表所以实际还是添加到注册申请里） -->
+	
+	<insert id="addChAppl" parameterType="com.vkl.ckts.common.entity.ChApplItemEntity" >
+	   <selectKey resultType="String" order="BEFORE" keyProperty="id">  
+       SELECT SEQ_APPL.Nextval as id from DUAL  
+        </selectKey> 
+		insert into CH_ITEM(
+		id,
+		HPZL,
+		HPHM,
+		CLSBDH,
+		OPER_TYPE,
+		OW_NAME,
+		OW_ADDR,
+		OW_IDENTITY,
+		OW_PHONE,
+		SYXZ,
+		KER_NAME,
+		KER_IDENTITY,
+		KER_POSTCODE,
+		KER_EMAIL,
+		KER_PHONE,
+		KER_ADDR,
+		CO_OW_NAME,
+		CO_OW_IDENTITY,
+		CO_OW_POSTCODE,
+		CO_OW_PHONE,
+		CO_OW_ADDR,
+		CO_OW_EMAIL,
+		NEW_PHONE,
+		NEW_ADDR,
+		NEW_POSTCODE,
+		NEW_EMAIL,
+		INTO_ADDR,
+		OUT_ADDR,
+		NEW_CSYS,
+		SIGINE_FDJH,
+		NEW_CLSBDH,
+		NEW_IDENTITY,
+		DVE_NAME,
+		DVE_VENDER,
+		DVE_MODEL,
+		DVE_DATE,
+		NEW_FDJH,
+		SRLN,
+		SIGINE_CLSBDH,
+		CRT_TIME,
+		CRTER,
+		DEL_FLAG
+		)values(
+		#{id},
+		#{hpzl},
+		#{hphm},
+		#{clsbdh},
+		#{operType},
+		#{owName},
+		#{owAddr},
+		#{owIdentity},
+		#{owPhone},
+		#{syxz},
+		#{kerName},
+		#{kerIdentity},
+		#{kerPostCode},
+		#{kerEmail},
+		#{kerPhone},
+		#{kerAddr},
+		#{coOwName},
+		#{coOwIdentity},
+		#{coOwPostCode},
+		#{coOwPhone},
+		#{coOwAddr},
+		#{coOwEmail},
+		#{newPhone},
+		#{newAddr},
+		#{newPostCode},
+		#{newEmail},
+		#{intoAddr},
+		#{outAddr},
+		#{newCsys},
+		#{sigineFdjh},
+		#{newClsbdh},
+		#{newIdentity},
+		#{dveName},
+		#{dveVender},
+		#{dveModel},
+		#{dveDate},
+		#{newFdjh},
+	    #{srln},
+	    #{sigineClsbdh},
+		#{createDate},
+		#{creater},
+		#{DEL_FLAG_NORMAL}
+		)
+	
+	</insert>
+	
+</mapper>

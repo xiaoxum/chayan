@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IVehInfoDtoDao">
+	<sql id="Columns">
+		XH
+		FZ_TIME
+		ZZCMC
+		CLPP1
+		CLXH
+		CLSBDH
+		CSYS
+		DP_TYPE
+		DP_ID
+		FDXH
+		FDJH
+		RLZL
+		YH
+		PL
+		BFBZ
+		GL20
+		WKCC
+		HXNBC
+		LTS
+		GBTHPS
+		LTGG
+		HL
+		ZH
+		ZS
+		ZJ
+		ZZL
+		ZBZL
+		ZXXS
+		HDZZL
+		HDZK
+		ZZLLYXS
+		ZQYZL
+		QPK
+		BKAZZL
+		ZZRQ
+		ZGSCS
+		SRLN
+		
+	</sql>
+	
+		<!-- 获取当前车辆信息 -->
+	<sql id="vehInfocolumns">
+		a.XH as "xh",
+		a.FZ_TIME as "fzTime",
+		a.ZZCMC as "zzcmc",
+		a.CLPP1 as "clpp1",
+		a.CLXH as "syxz",
+		a.CLSBDH as "clsbdh",
+		a.CSYS as
+		"csys",
+		a.DP_TYPE as "dpType",
+		a.DP_ID as "dpId",
+		a.FDXH as "fdxh",
+		a.FDJH as "fdjh",
+		a.RLZL as "rlzl",
+		a.YH as "yh",
+		a.PL as "pl",
+		a.BFBZ as
+		"bfbz",
+		a.GL20 as "gl20",
+		a.WKCC as "wkcc",
+		a.HXNBC as "hxnbc",
+		a.LTS as
+		"lts",
+		a.GBTHPS as "gbthps",
+		a.LTGG as "ltgg",
+		a.HL as "hl",
+		a.ZH as "zh",
+		a.ZS as "zs",
+		a.ZJ as "zj",
+		a.ZZL as "zzl",
+		a.ZBZL as "zbzl",
+		a.ZXXS as
+		"zxxs",
+		a.HDZZL as "hdzzl",
+		a.HDZK as "hdzk",
+		a.ZZLLYXS as "zzllyxs",
+		a.ZQYZL as "zqyzl",
+		a.QPK as "qpk",
+		a.BKAZZL as "bkazzl",
+		a.ZZRQ as
+		"zzrq",
+		a.ZGSCS as "zgscs",
+		a.SRLN as "srln"
+	</sql>
+	
+	
+	<!-- 插入合格证信息 -->
+	<insert id="insertData" >
+		insert into VEH_INFO
+		(XH,
+		FZ_TIME,
+		ZZCMC,
+		CLPP1,
+		CLXH,
+		CLSBDH,
+		CSYS,
+		DP_TYPE,
+		DP_ID,
+		FDXH,
+		FDJH,
+		RLZL,
+		YH,
+		PL,
+		BFBZ,
+		GL20,
+		WKCC,
+		HXNBC,
+		LTS,
+		GBTHPS,
+		LTGG,
+		HL,
+		ZH,
+		ZS,
+		ZJ,
+		ZZL,
+		ZBZL,
+		ZXXS,
+		HDZZL,
+		HDZK,
+		ZZLLYXS,
+		ZQYZL,
+		QPK,
+		BKAZZL,
+		ZZRQ,
+		ZGSCS,
+		SRLN
+		)values(
+		#{xh},
+		#{fzTime},
+		#{zzcmc},
+		#{clpp1},
+		#{clxh},
+		#{clsbdh},
+		#{csys},
+		#{dpType},
+		#{dpId},
+		#{fdxh},
+		#{fdjh},
+		#{rlzl},
+		#{yh},
+		#{pl},
+		#{bfbz},
+		#{gl20},
+		#{wkcc},
+		#{hxnbc},
+		#{lts},
+		#{gbthps},
+		#{ltgg},
+		#{hl},
+		#{zh},
+		#{zs},
+		#{zj},
+		#{zzl},
+		#{zbzl},
+		#{zxxs},
+		#{hdzzl},
+		#{hdzk},
+		#{zzllyxs},
+		#{zqyzl},
+		#{qpk},
+		#{bkazzl},
+		#{zzrq},
+		#{zgscs},
+		#{srln})
+	</insert>
+   <!-- 获取车辆类型 -->
+   <select id="selectById" resultType="com.vkl.ckts.cksy.servacpt.entity.VehInfoDto">
+       select
+          <include refid="vehInfocolumns"/>
+       from 
+           VEH_INFO a
+       where 
+           a.SRLN=#{srln}
+   </select>
+
+   <update id="updateVehicleInfo">
+   		update 
+   		veh_info 
+   		set 
+   		CLSBDH=#{clsbdh},
+   		CSYS=#{csys},
+   		HDZK=#{hdzk}
+   		 where 
+           SRLN=#{srln}
+   </update>
+
+</mapper>

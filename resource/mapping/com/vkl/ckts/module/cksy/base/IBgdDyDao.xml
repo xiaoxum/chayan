@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.base.dao.IBgdDyDao">
+    <sql id="ckinfocolumns">
+		a.SRLN as "srln",
+		a.OPER_TYPE as "operType",
+		NVL(a.HPHM,'') as "hphm",
+		NVL(a.SYXZ,' ') as "syxzx",
+		NVL(t1.LDICTIONARY_ABEL,' ') as "hpzl",
+		NVL(r.SYXZ_NAME,' ') as "syxz",
+		NVL(a.CLSBDH,'') as "clsbdh2",
+		NVL(a.CKER,' ') as "cker",
+		NVL(a.CLLX,' ') as "cllxs",
+		NVL(to_char(a.RCK_COUNT),' ') as
+		"rckCount",
+		a.AUDIT_FLAG as "auditFlag",
+		a.ORGAN_CODE as "jgbh",
+		to_char(a.PDA_START,'YYYY-MM-DD')  as  "cysj",
+		to_char(a.RCK_TIME,'YYYY-MM-DD')   as  "fjsh"
+	</sql>
+	
+	
+
+   
+	<select id="findCkInfo"  resultType="java.util.HashMap">
+	   select
+		<include refid="ckinfocolumns" />
+		,e.VIEW_NAME as "viewName"
+		,e.LOGIN_NAME   as "loginName"
+		from CK_INFO a 
+		inner join CEH_USNR r on r.SYXZ = a.SYXZ
+		left join DICT t1 on t1.DICT_KEY = a.HPZL and t1.DICT_TYPE = 'hpzl'
+		left join VIEWER_FILE e on e.FILE_ID =  a.CKER
+		where 
+		a.RCK_COUNT = (select MAX(b.RCK_COUNT) from CK_INFO b  group by b.SRLN
+		HAVING b.SRLN=a.SRLN)
+	             and a.SFDY='0'
+	             and a.OPER_STATU = '5'
+	             and a.AUDIT_FLAG = '0'
+	</select>
+	
+    <!-- 打印单个查验业务 -->
+	<select id="findCkOne"  resultType="java.util.HashMap">
+	   select
+		<include refid="ckinfocolumns" />
+		,e.VIEW_NAME as "viewName"
+		,e.LOGIN_NAME   as "loginName"
+		from CK_INFO a 
+		inner join CEH_USNR r on r.SYXZ = a.SYXZ
+		left join DICT t1 on t1.DICT_KEY = a.HPZL and t1.DICT_TYPE = 'hpzl'
+		left join VIEWER_FILE e on e.FILE_ID =  a.CKER
+		where 
+		a.SRLN = #{0}
+		and 
+		a.RCK_COUNT = #{1}
+		and 
+	      a.OPER_STATU = '5'
+	    and 
+	      a.AUDIT_FLAG = '0'
+	</select>
+	<!-- 更新打印状态 -->
+	<update id="updatedyStatu">
+	   update 
+	      CK_INFO e
+	   set e.SFDY='1'
+	   where 
+	    e.SRLN = #{0}
+		and 
+		e.RCK_COUNT = #{1}
+	</update>
+	
+	
+	
+	
+	<!-- 获取签名 -->
+	<select id="findCkerQm" resultType="java.util.HashMap">
+	    select 
+	     CYHGQM   as "cyHgQm",
+	       CYBHGQM as  "cybHgQm",
+	       CYQM    as "cyqm"
+	    from 
+	      USERS S
+	    WHERE S.IS_FILER='1'
+	          and S.FILER_ID=#{fileID}
+	</select>
+	
+	
+		<!-- 根据流水号查询不合格项目 -->
+	<select id="findCkItem"
+		resultType="com.vkl.ckts.cksy.base.dto.ProjectRecordDto">
+		select
+		
+		
+		r.CK_FLAG   as  "ckflag",
+		r.PRO_ID    as "proId"
+		from PROJECT_RECORD r
+		inner join CK_PROJECT c on c.ID=r.PRO_ID
+		where
+		r.SRLN=#{srln}
+	    and r.RCK_COUNT = (select MAX(b.RCK_COUNT) from PROJECT_RECORD b  where b.SRLN =#{srln} group by b.PRO_ID HAVING b.PRO_ID=r.PRO_ID)
+	</select>
+	
+	<select id="findProject" resultType="com.vkl.ckts.common.entity.CkProjectEntity">
+	   select 
+	      ck.ID  as "id",
+	      ck.MATCH_FIELD as "matchField"
+	   from 
+	   CK_PROJECT ck
+	   where  ck.IS_ENABLE='1'
+	         and  ck.PRO_TYPE = '0'
+	</select>
+	
+	<!-- 查询照片路径  -->
+	<select id="findPicById" resultType="com.vkl.ckts.cksy.base.dto.PicRecordDto">
+	   select
+		a.PIC_ID as "picId",
+         a.PIC_URL as "picUrl"
+		from PIC_RECORD a
+		where a.SRLN=#{0}
+		 and a.PIC_ID=#{1}
+	     and a.RCK_COUNT = (select MAX(b.RCK_COUNT) from PIC_RECORD b where b.SRLN=#{0}  group by b.PIC_ID HAVING b.PIC_ID=#{1})
+	
+	</select>
+	
+	<!-- 打印单张照片记录  -->
+	<select id="findPhotoRecordsOneCK" resultType="java.util.HashMap">
+	    select
+		          a.PIC_ID      as "picId",
+                  a.PIC_URL     as "picUrl",
+                  t.PRINT_NUM   as "printNum",
+                  a.RCK_COUNT   as "rckCount"
+		from 
+		          PIC_RECORD a
+	    inner join 
+	              OPER_PIC_PROJECT t
+	    on 
+		              t.PIC_PRO = a.PIC_ID
+			      and 
+			          t.OPER_TYPE= #{1}
+			      and 
+			          t.SYXZ=#{2}
+			      and 
+			          t.CLLX=#{3}
+		where 
+		              a.SRLN=#{0}
+	              and 
+	                  a.RCK_COUNT = (select MAX(b.RCK_COUNT) from PIC_RECORD b  group by b.PIC_ID HAVING b.PIC_ID=a.PIC_ID)
+	</select>
+		<!-- 打印照片记录  -->
+	<select id="findPhotoRecords" resultType="java.util.HashMap">
+	    select
+		          a.PIC_ID      as "picId",
+                  a.PIC_URL     as "picUrl",
+                  t.PRINT_NUM   as "printNum",
+                  a.RCK_COUNT   as "rckCount"
+		from 
+		          PIC_RECORD a
+	    inner join 
+	              OPER_PIC_PROJECT t
+	    on 
+		              t.PIC_PRO = a.PIC_ID
+			      and 
+			          t.OPER_TYPE= #{1}
+			      and 
+			          t.SYXZ=#{2}
+			      and 
+			          t.CLLX=#{3}
+		where 
+		              a.SRLN=#{0}
+	              and 
+	                  a.RCK_COUNT = (select MAX(b.RCK_COUNT) from PIC_RECORD b  group by b.PIC_ID HAVING b.PIC_ID=a.PIC_ID)
+	              and 
+	                  a.SFDY ! = '1'
+	   
+	</select>
+	<!-- 查询父级车型 -->
+	<select id="findParentCllx" resultType="java.lang.String">
+	     select 
+	        distinct 
+	         a.P_CLLX
+	     from 
+	        CK_CLLX a
+	     where 
+	        a.CLLX=#{0}
+	</select>
+	
+	<!-- 查询父级车型 -->
+	<select id="findCllxName" resultType="java.lang.String">
+	     select 
+	         NVL(a.CLLX_NAME,'-')
+	     from 
+	        CK_CLLX a
+	     where 
+	        a.CLLX=#{0}
+	</select>
+	
+	<!-- 更新照片打印状态 -->
+	<update id="updatePicDyStatu">
+	   update 
+	            PIC_RECORD  a
+	   set
+	            a.SFDY='1'
+	   where 
+	               a.SRLN=#{0}
+	            and 
+	               a.RCK_COUNT = #{1}
+	            and 
+	               a.PIC_ID=#{2}
+	</update>
+	
+	<!-- 根据使用性质获取父级车型 -->
+   <select id="findParentSyxz" resultType="java.lang.String">
+       select 
+           distinct
+           a.parent_id
+       from
+           CEH_USNR  a
+       where 
+            a.syxz=#{0}
+   </select>
+	
+	
+	<select id="findVehInfo" resultType="com.vkl.ckts.common.entity.VehInfoEntity">
+	      select 
+	         NVL(CSYS,'-')  as "csys",
+	         HDZK  as "hdzk"
+	      from 
+	        VEH_INFO 
+	       where 
+	         SRLN=#{0}
+	</select>
+	
+	
+		<!-- 获取签名 -->
+	<select id="findCkerQmView" resultType="java.util.HashMap">
+	    select 
+	       SIGN_NAME_URL   as "cyqm",
+	       SIGN_HG_URL     as  "cyHgQm",
+	       SIGN_NOHG_URL   as "cybHgQm"
+	    from 
+	      VIEWER_FILE S
+	    WHERE 
+	           S.FILE_ID=#{fileID}
+	 </select>
+</mapper>

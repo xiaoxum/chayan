@@ -1,0 +1,259 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.pub.dao.IBaseDao">
+	<sql id = "userColumns">
+		ID as "id",
+		USER_NAME as "userName",
+		USER_TELE as "userTele",
+		FUZZ as "fuzz",
+		USER_STATU as "userStatu",
+		USER_DEPT as "userDept",
+		USER_ADDR as "userAddr",
+		IDENTITY_CARD as "identityCard",
+		USER_PHONE as "userPhone",
+		USER_EMAIL as "userEmail",
+		LOGIN_TIME as "loginTime",
+		LOGIN_IP as "loginIp",
+		IS_ONLINE as "isOnline",
+		PIC_URL as "picUrl",
+		LOGIN_NAME as "loginName",
+		PINGYIN_CODE as "pingyinCode",
+		LOGIN_PWD as "loginPwd",
+		USER_SEX as "userSex",
+		USER_BIRTH as "userBirth",
+		IS_FILER as "isFiler",
+		FILER_ID as "filerId",
+		USER_JOP as "userJop",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		SFGLY    as "sfgly"
+		
+	</sql>
+	
+	<!-- 根据用户名查找用户 -->
+	<select id = "findUserByLoginName" resultType = "com.vkl.ckts.common.entity.UserEntity">
+		select <include refid = "userColumns"></include> from users
+		where login_name = #{loginName} and DEL_FLAG='0'
+	</select>
+	
+	<!-- 根据用户id查找用户 -->
+	<select id = "findUserByid" resultType = "com.vkl.ckts.common.entity.UserEntity">
+		select <include refid = "userColumns"></include> from users
+		where id = #{id}
+	</select>
+	
+	<!-- 根据用户id修改密码 -->
+	<select id = "upPasswordByid"  >
+		update users
+		set LOGIN_PWD = #{newpassword}
+		where ID = #{id}
+	</select>
+	
+	<!-- 修改用户在线状态 -->
+	<update id = "updateOnlineState" parameterType = "com.vkl.ckts.common.entity.UserEntity">
+		update users
+		set IS_ONLINE = #{isOnline}
+		where ID = #{id}
+	</update>
+	
+	<!-- 修改用户登录ip和最近登录时间 -->
+	<update id = "updateLoginIpAndTime">
+		update users
+		set LOGIN_IP = #{loginIp},LOGIN_TIME = #{loginTime}
+		where ID = #{id}
+	</update>
+	
+	<!-- 添加用户 -->
+	<insert id="addUser">
+		insert into users(
+			ID,
+			USER_NAME,
+			USER_TELE,
+			FUZZ,
+			USER_STATU,
+			USER_DEPT,
+			USER_ADDR,
+			IDENTITY_CARD,
+			USER_PHONE,
+			USER_EMAIL,
+			LOGIN_TIME,
+			LOGIN_IP,
+			IS_ONLINE,
+			PIC_URL,
+			LOGIN_NAME,
+			PINGYIN_CODE,
+			LOGIN_PWD,
+			USER_SEX,
+			USER_BIRTH,
+			IS_FILER,
+			FILER_ID,
+			USER_JOP,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			SFGLY
+		) values(
+			seq_user.nextval,
+			#{userName},
+			#{userTele},
+			#{fuzz},
+			#{userStatu},
+			#{userDept},
+			#{userAddr},
+			#{identityCard},
+			#{userPhone},
+			#{userEmail},
+			#{loginTime},
+			#{loginIp},
+			#{isOnline},
+			#{picUrl},
+			#{loginName},
+			#{pingyinCode},
+			#{loginPwd},
+			#{userSex},
+			#{userBirth},
+			#{isFiler},
+			#{filerId},
+			#{userJop},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			'0'
+		)
+	</insert>
+
+	<!-- 查找当前登录用户所属部门类型 -->
+	<select id="findUserDeptType" parameterType="com.vkl.ckts.common.entity.UserEntity" resultType="Integer">
+		select d.DEPT_TYPE from USERS u inner join DEPT d on u.user_dept=d.id where u.id=#{id}
+	</select>
+	
+		<!-- 根据id查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="id != null and id != '' ">
+				and ID = #{id}
+			</if>
+		</where>
+	
+	</select>
+
+
+
+
+   
+
+
+  
+ <!-- 查询菜单信息 -->
+  <select id="findMdxx" resultType="com.vkl.ckts.pub.dto.MdxxDto">
+	select
+	distinct
+	x.ID as "id",
+	x.MENU_NAME as "menuName",
+	x.MENU_FLAG as "menuFlag",
+	x.MENU_URL as "menuUrl",
+	x.PARENT_MENU as "parentMenu",
+	x.MENU_OWER as "menuOwer",
+	x.SORT 
+	from
+	MENU x
+	inner join ROLE_MENU q
+	on q.MENU_ID=x.ID
+	inner join ROLE j
+	on j.ID=q.ROLE_ID
+	inner join USER_ROLE h
+	on h.ROLE_ID=j.ID
+	inner join USERS yh
+	on yh.ID=h.USE_ID
+	where   x.PARENT_MENU='0'
+         <if test=" yhbh != null and yhbh !=''  ">
+          and yh.ID=#{yhbh}
+         </if>
+       order by x.SORT   
+  </select>
+  
+  
+     <!-- 查询菜单信息 -->
+  <select id="findMdxx2" resultType="com.vkl.ckts.pub.dto.MdxxDto">
+      select 
+      distinct
+     x.ID as "id",
+	x.MENU_NAME as "menuName",
+	x.MENU_FLAG as "menuFlag",
+	x.MENU_URL as "menuUrl",
+	x.PARENT_MENU as "parentMenu",
+	x.MENU_OWER as "menuOwer",
+	x.SORT
+      from 
+      MENU x
+     
+      where 
+         x.PARENT_MENU='0'
+         order by x.SORT
+  </select>
+  
+  
+  
+  <!-- 根据父级菜单查询子菜单信息 -->
+  <select id="findZcdxx" resultType="com.vkl.ckts.pub.dto.MdxxDto">
+      select 
+      distinct
+     x.ID as "id",
+	x.MENU_NAME as "menuName",
+	x.MENU_FLAG as "menuFlag",
+	x.MENU_URL as "menuUrl",
+	x.PARENT_MENU as "parentMenu",
+	x.MENU_OWER as "menuOwer",
+	x.SORT
+      from 
+      MENU x
+     inner join ROLE_MENU q
+	on q.MENU_ID=x.ID
+	inner join ROLE j
+	on j.ID=q.ROLE_ID
+	inner join USER_ROLE h
+	on h.ROLE_ID=j.ID
+	inner join USERS yh
+	on yh.ID=h.USE_ID
+      where  x.PARENT_MENU=#{fcdId}
+          <if test=" yhbh != null and  yhbh !=''  ">
+            and yh.ID=#{yhbh}
+         </if>
+        order by x.SORT
+  </select>
+
+  
+  <!-- 根据父级菜单查询子菜单信息 -->
+  <select id="findZcdxx2" resultType="com.vkl.ckts.pub.dto.MdxxDto">
+      select 
+      distinct
+     x.ID as "id",
+	x.MENU_NAME as "menuName",
+	x.MENU_FLAG as "menuFlag",
+	x.MENU_URL as "menuUrl",
+	x.PARENT_MENU as "parentMenu",
+	x.MENU_OWER as "menuOwer",
+	x.SORT
+      from 
+      MENU x
+      where 
+        x.PARENT_MENU=#{fcdId}
+        order by x.SORT
+  </select>
+
+
+
+
+
+
+</mapper>
+

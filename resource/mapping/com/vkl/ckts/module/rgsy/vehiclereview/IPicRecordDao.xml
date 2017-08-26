@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.vehiclereview.dao.IPicRecordDao">
+	
+	<sql id="column">
+		a.srln as "srln",
+		a.pic_url as "picUrl",
+		a.pic_id as "picId",
+		b.pro_name as "proName",
+		a.PIC_STATU as "picStatu",
+		a.AUDIT_REMAKS as "auditRemaks"
+	</sql>
+
+	<!-- 根据流水号查询 -->
+	<select id="findBySrln" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.PicRecordDto">
+		select 
+		a.srln as "srln",
+		a.pic_url as "picUrl",
+		a.pic_id as "picId",
+		b.pic_name as "proName",
+		a.PIC_STATU as "picStatu",
+		
+		a.AUDIT_REMAKS as "auditRemaks"
+		from PIC_RECORD a left join PIC_PROJECT b 
+		on a.pic_id=b.id
+		where a.srln=#{srln} and  a.RCK_COUNT =#{rckCount}
+		and  
+		           a.pic_url is not null
+	</select>
+	<!-- 更新照片记录表数据 -->
+	<update id="updInfo">
+		update PIC_RECORD set
+		AUDIT_REMAKS=#{auditRemaks},PIC_STATU=#{picStatu}
+		where srln=#{srln} and PIC_ID=#{picId}
+	</update>
+</mapper>

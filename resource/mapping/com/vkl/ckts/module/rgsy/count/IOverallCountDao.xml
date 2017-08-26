@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.statistic.count.dao.IOverallCountDao">
+	
+	<!-- 外廓尺寸测量总数 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.statistic.count.entity.CheckCount">
+		select * from(
+			select a.*,rownum as rowno from(
+				select z.aCount as aCount,
+				(case when z.cCount is null then 0 when z.cCount is not null then z.cCount end)as cCount,
+				   c.parent_name as parentName,
+				   f.organ_name as organName,
+   				   z.device_id as overall,
+   				   i.oper_type,
+				   (case when t.type_name is null then '变更备案' when t.type_name is not null then t.type_name end )as typeName,
+				   i.crt_time
+				from(
+				  select m.aCount,d.cCount,m.device_id,m.srln from
+				  (select count(1) as aCount,p.device_id,p.srln from gbr_record p 
+				  group by p.device_id,p.srln)m
+				  left join (select count(1) as cCount,q.srln,q.device_id from gbr_record q where  q.is_qlf = '0' group by q.device_id ,q.srln)d
+				  on m.srln = d.srln 
+				)z
+				left join ck_info i on i.srln = z.srln
+				left join oper_type t on t.id = i.oper_type
+				left join ck_cllx c on c.cllx = i.cllx
+				left join chkpt_file f on f.organ_code = i.organ_code
+				<where>
+						<if test="t.cllx != null and t.cllx != ''">
+							and c.p_cllx = #{t.cllx}
+						</if>
+						<if test="t.operType != null and t.operType != ''">
+							and 
+							    (INSTR(i.oper_type,#{t.operType}||',')=1
+							OR INSTR(i.oper_type,','||#{t.operType}||',')>0
+							OR i.oper_type=#{t.operType}
+							OR 
+							length(i.oper_type) = 
+							(CASE 
+								WHEN length(#{t.operType}) = length(i.oper_type) 
+						    	THEN  -1  
+				        		ELSE  length(','||#{t.operType}||'')-1+INSTR(i.oper_type,','||#{t.operType}) 
+				        		END ))  
+						</if>
+						<if test="t.organCode != null and t.organCode != ''">
+							and i.organ_code = #{t.organCode}
+						</if>
+						<if test="t.start != '' and t.start != null">
+							and to_char(i.crt_time,'yyyy-mm-dd')  &gt;= #{t.start}
+						</if>
+						<if test="t.end != '' and t.end != null">
+							and to_char(i.crt_time,'yyyy-mm-dd')  &lt;= #{t.end}
+						</if>
+					</where>
+			)a where rownum &lt; #{pageNo} * #{pageSize}
+		)b where b.rowno &gt; (#{pageNo} -1) * #{pageSize}		
+	</select>
+	
+	<!-- 分页查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select z.aCount as aCount,(case when z.cCount is null then 0 when z.cCount is not null then z.cCount end)as cCount,
+				   c.parent_name as parentName,
+				   f.organ_name as organName,
+   				   z.device_id as overall,
+   				   i.oper_type,
+				   (case when t.type_name is null then '变更备案' when t.type_name is not null then t.type_name end )as typeName,
+				   i.crt_time
+				from(
+				  select m.aCount,d.cCount,m.device_id,m.srln from
+				  (select count(1) as aCount,p.device_id,p.srln from gbr_record p 
+				  group by p.device_id,p.srln)m
+				  left join (select count(1) as cCount,q.srln,q.device_id from gbr_record q where  q.is_qlf = '0' group by q.device_id ,q.srln)d
+				  on m.srln = d.srln 
+				)z
+				left join ck_info i on i.srln = z.srln
+				left join oper_type t on t.id = i.oper_type
+				left join ck_cllx c on c.cllx = i.cllx
+				left join chkpt_file f on f.organ_code = i.organ_code
+			<where>
+					<if test="cllx != null and cllx != ''">
+						and c.p_cllx = #{cllx}
+					</if>
+					<if test="operType != null and operType != ''">
+							and 
+							    (INSTR(i.oper_type,#{operType}||',')=1
+							OR INSTR(i.oper_type,','||#{operType}||',')>0
+							OR i.oper_type=#{operType}
+							OR 
+							length(i.oper_type) = 
+							(CASE 
+								WHEN length(#{operType}) = length(i.oper_type) 
+						    	THEN  -1  
+				        		ELSE  length(','||#{operType}||'')-1+INSTR(i.oper_type,','||#{operType}) 
+				        		END ))  
+						</if>
+					<if test="organCode != null and organCode != ''">
+							and i.organ_code = #{organCode}
+						</if>
+					<if test="start != '' and start != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &gt;= #{start}
+					</if>
+					<if test="end != '' and end != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &lt;= #{end}
+					</if>
+				</where>
+		)
+	</select>
+	
+	<!-- 查验总计 -->
+	<select id="allCount" resultType="Integer">
+		select count(1)
+			from ck_info i
+			inner join gbr_record g on i.srln = g.srln
+			inner join ck_cllx c on c.cllx = i.cllx
+			left join oper_type t on t.id = i.oper_type
+			<where>
+					<if test="cllx != null and cllx != ''">
+						and c.p_cllx = #{cllx}
+					</if>
+					<choose>
+						<when test="typeName == '变更备案'">
+							and t.parent_id is null
+						</when>
+						<otherwise>
+							and t.id = #{typeName}
+						</otherwise>
+					</choose>
+					<if test="organCode != null and organCode != ''">
+							and i.organ_code = #{organCode}
+						</if>
+					<if test="start != '' and start != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &gt;= #{start}
+					</if>
+					<if test="end != '' and end != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &lt;= #{end}
+					</if>
+					and g.device_id = #{overall}
+				</where>
+	</select>
+	
+	<!-- 查验合格总计 -->
+	<select id="checkCount" resultType="Integer">
+		select count(1)
+			from ck_info i
+			inner join gbr_record g on i.srln = g.srln
+			inner join ck_cllx c on c.cllx = i.cllx
+			left join oper_type t on t.id = i.oper_type
+			<where>
+					<if test="cllx != null and cllx != ''">
+						and c.p_cllx = #{cllx}
+					</if>
+					<choose>
+						<when test="typeName == '变更备案'">
+							and t.parent_id is null
+						</when>
+						<otherwise>
+							and t.id = #{typeName}
+						</otherwise>
+					</choose>
+					<if test="organCode != null and organCode != ''">
+							and i.organ_code = #{organCode}
+						</if>
+					<if test="start != '' and start != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &gt;= #{start}
+					</if>
+					<if test="end != '' and end != null">
+						and to_char(i.crt_time,'yyyy-mm-dd')  &lt;= #{end}
+					</if>
+					and g.device_id = #{overall}
+					and i.audit_flag = #{auditFlag}
+				</where>
+	</select>
+</mapper> 

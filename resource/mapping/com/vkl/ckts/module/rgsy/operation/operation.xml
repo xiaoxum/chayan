@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.operationsetting.dao.IOperationDao">
+	<sql id="ckProject">
+		j.ID AS "id",
+		j.HELP_INTR AS "helpIntr",
+		j.PRO_NAME AS "proName",
+		j.PRO_TYPE AS "proType",
+		j.PRO_CLASS AS "proClass"
+	</sql>
+	<sql id="proAnnc">
+		p.ID as "id",
+		p.ANNC_CONTENT AS "addcContent",
+		p.PRO_ID AS "proId",
+		p.ANNC_STATU AS "anncStatu"
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.system.operationsetting.entity.newProAnnc">
+		select * from(
+			select a.*,rownum as rowno from(
+				select <include refid="proAnnc"/>,j.pro_name AS "proName" from pro_annc p inner join 
+					ck_project j on p.pro_id = j.id  where 1=1
+					<if test="t.proId != null and t.proId !=''">
+						and p.PRO_ID = #{t.proId}
+					</if>
+					<if test="t.id != null and t.id != ''">
+						and p.ID = #{t.id}
+					</if>
+					<if test="t.anncStatu != null and t.anncStatu != ''">
+						and p.ANNC_STATU = #{t.anncStatu}
+					</if>
+					order by p.ID desc
+			)a
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+		)b
+		<where>
+			b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+		</where>
+		
+	</select>
+	
+	<!-- 查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from pro_annc
+	</select>
+	
+	<!-- 查询一条业务信息 -->
+	<select id="oneOper" resultType="com.vkl.ckts.rgsy.system.operationsetting.entity.newProAnnc">
+		select <include refid="proAnnc"/>,j.pro_name AS "proName" from pro_annc p inner join 
+			ck_project j on p.pro_id = j.id  
+			<where>
+				<if test="id != null and id != ''">
+					p.id=#{id}
+				</if>
+				<if test="proId != null and proId != ''">
+					p.pro_id = #{proId}
+				</if>
+			</where> 
+	</select>
+	
+	<!-- 添加业务信息 -->
+	<insert id="insertData" parameterType="com.vkl.ckts.rgsy.system.operationsetting.entity.newProAnnc">
+		
+		insert into pro_annc (
+			id,
+			ANNC_CONTENT,
+			PRO_ID ,
+			ANNC_STATU 
+		)values(
+			SEQ_BLACK.nextval,
+			#{addcContent},
+			#{proId},
+			#{anncStatu}
+		)
+	</insert>
+	
+	<!-- 修改业务信息 -->
+	<update id="updateData" parameterType="com.vkl.ckts.rgsy.system.operationsetting.entity.newProAnnc">
+		update pro_annc 
+			set ANNC_CONTENT = #{addcContent},
+			PRO_ID = #{proId},
+			ANNC_STATU  = #{anncStatu}
+			 where ID=#{id}
+	</update>
+	
+	<!-- 删除业务信息 -->
+	<delete id="deleteData" parameterType="com.vkl.ckts.rgsy.system.operationsetting.entity.newProAnnc">
+		delete pro_annc where id=#{id}
+	</delete>
+</mapper>

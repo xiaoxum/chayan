@@ -1,0 +1,201 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.jurisdict.dao.IRoleDao">
+	<sql id="RoleColumns">
+		ID as "id",
+		NVL(ROLE_NAME,' ') as "roleName",
+		NVL(ROLE_INTR,' ') as "roleIntr",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		ROLE_OWER as "roleOwer"
+	</sql>
+	
+	<sql id="RoleMenuColumns">
+		ROLE_ID as "id",
+		MENU_ID as "menuId"
+	</sql>
+	
+	
+	<!--添加角色  -->
+	<insert id="addRole" parameterType="com.vkl.ckts.common.entity.RoleEntity">
+	<selectKey resultType="String" order="BEFORE" keyProperty="id">  
+       SELECT seq_user.nextval as id from DUAL  
+    </selectKey> 
+		insert into ROLE(
+			ID ,
+			ROLE_NAME ,
+			ROLE_INTR ,
+			CRT_TIME ,
+			CRTER ,
+			UPD_TIME ,
+			UPDER ,
+			DEL_FLAG ,
+			ROLE_OWER,
+			DEPTID
+		)values(
+			seq_user.currval,
+			#{roleName},
+			#{roleIntr},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{roleOwer},
+			#{deptId}
+		)
+		
+	</insert>
+
+	<!-- 查找角色的权限集合 -->
+	<select id="findRoleMenuList" parameterType="com.vkl.ckts.common.entity.RoleMenuEntity" resultType="com.vkl.ckts.common.entity.RoleMenuEntity">
+		select <include refid="RoleMenuColumns"></include> from ROLE_MENU where ROLE_ID = #{id}
+	</select>
+	
+	<!--添加角色权限  -->
+	<insert id="addRoleMenu" parameterType="com.vkl.ckts.common.entity.RoleMenuEntity">
+		insert into ROLE_MENU(ROLE_ID,MENU_ID) values(#{id},#{menuId})
+	</insert>
+	
+	<!--删除角色权限  -->
+	<delete id="deleteRoleMenu" parameterType="com.vkl.ckts.common.entity.RoleMenuEntity">
+		delete from  ROLE_MENU where ROLE_ID = #{id}
+	</delete>
+		
+	<!-- 查找角色 -->
+	<select id="findRole" resultType="com.vkl.ckts.common.entity.RoleEntity" parameterType="com.vkl.ckts.common.entity.RoleEntity">
+		select <include refid="RoleColumns"></include> from ROLE
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL} and ROLE_NAME = #{roleName} and ROLE_OWER = #{roleOwer}
+			</where>
+	</select>
+	
+	<!-- 根据id查找角色 -->
+	<select id="findRoleById" resultType="com.vkl.ckts.common.entity.RoleEntity" parameterType="com.vkl.ckts.common.entity.RoleEntity">
+		select <include refid="RoleColumns"></include> from ROLE
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL} and id = #{id} 
+			</where>
+	</select>
+	
+	<!-- 分页查询角色信息 -->
+	<select id="pageRole" resultType="com.vkl.ckts.rgsy.jurisdict.entity.RoleDto">
+		select <include refid="RoleColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from ROLE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL} 
+					<if test = "t.roleName != null and t.roleName != ''">
+						and ROLE_NAME like '%'||#{t.roleName}||'%'
+					</if>
+					<if test=" t.deptId != null and t.deptId !='' ">
+					     and  DEPTID = #{t.deptId}
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询角色信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.RoleEntity" resultType="Integer">
+		select count(1) from ROLE
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL} <!-- and ROLE_OWER = #{roleOwer} -->
+				<if test = "roleName != null and roleName != ''">
+					and ROLE_NAME like '%'||#{roleName}||'%'
+				</if>
+				<if test=" deptId != null and deptId !='' ">
+					     and  DEPTID = #{deptId}
+					</if>
+			</where>
+	</select>
+	
+	<!-- 查找所有角色（根据当前登录用户的部门类型查找） -->
+	<select id="findRoleList" resultType="com.vkl.ckts.common.entity.RoleEntity">
+		select <include refid="RoleColumns"></include> from ROLE
+			<where>
+				DEL_FLAG = '0'<if test="deptId != null and deptId !='' ">and  DEPTID = #{deptId}</if> 
+			</where>
+	</select>
+	
+	<!-- 根据角色编号逻辑删除角色信息 -->
+	<update id="deleteRoleById" parameterType="com.vkl.ckts.common.entity.RoleEntity">
+		update Role set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</update>
+	
+	<!-- 修改角色 -->
+	<update id="updateRole" parameterType="com.vkl.ckts.common.entity.RoleEntity">
+		update ROLE set 
+			ROLE_NAME = #{roleName},
+			ROLE_INTR = #{roleIntr},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater}
+		where ID = #{id}
+	</update>
+	
+<!-- 根据父类id查找子部门 -->
+	<select id="findMenuListByParentId" resultType="com.vkl.ckts.common.entity.MenuEntity" >
+		 select 
+		       distinct
+		        a.ID as "id",
+				a.MENU_NAME as "menuName",
+				a.MENU_FLAG as "menuFlag",
+				a.MENU_URL as "menuUrl",
+				a.PARENT_MENU as "parentMenu",
+				a.MENU_OWER as "menuOwer",
+				a.CRT_TIME as "createDate",
+				a.CRTER as "creater",
+				a.UPD_TIME as "updDate",
+				a.UPDER as "updater",
+				a.DEL_FLAG as "delFlag"
+		 from 
+		        MENU a
+		        left join ROLE_MENU q
+				on q.MENU_ID=a.ID
+				left join ROLE j
+				on j.ID=q.ROLE_ID
+				left join USER_ROLE h
+				on h.ROLE_ID=j.ID
+				left join USERS yh
+				on yh.ID=h.USE_ID
+		 <where>
+			    a.DEL_FLAG = '0' 
+			 
+			     <if test="parentMenu !=null and parentMenu !='' ">
+			       and  a.PARENT_MENU = #{parentMenu}
+			    </if>
+			     
+			    <if test="yhbh !=null and yhbh !='' ">
+			       and  yh.ID=#{yhbh}
+			    </if>
+			
+		</where>
+	</select>
+
+
+         <!-- 查询菜单信息 -->
+  <select id="findMdxx2" resultType="com.vkl.ckts.common.entity.MenuEntity">
+      select 
+                a.ID as "id",
+				a.MENU_NAME as "menuName",
+				a.MENU_FLAG as "menuFlag",
+				a.MENU_URL as "menuUrl",
+				a.PARENT_MENU as "parentMenu",
+				a.MENU_OWER as "menuOwer",
+				a.CRT_TIME as "createDate",
+				a.CRTER as "creater",
+				a.UPD_TIME as "updDate",
+				a.UPDER as "updater",
+				a.DEL_FLAG as "delFlag"
+      from 
+                MENU a
+  </select>
+  
+    
+</mapper>
+

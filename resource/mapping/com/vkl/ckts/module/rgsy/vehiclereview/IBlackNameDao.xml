@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.vehiclereview.dao.IBlackNameDao">
+	<sql id="column">
+		b.ID as id,
+		b.SRLN as srln,
+		b.HPZL as hpzl,
+		b.HBHM as hbhm,
+		b.JOIN_BLACK_TIME as joinBlackTime,
+		b.BLACKLIST_STATU as blacklistStatu,
+		b.REMARKS as remarks,
+		b.CLLX as cllx,
+		b.CLSBDH as clsbdh,
+		b.ASTS as asts,
+		b.VEH_OWER as vehOwer,
+		b.CURR_OPERA_TYPE as currOperaType,
+		b.CLPP as clpp,
+		b.CRT_TIME as createDate,
+		b.CRTER as creater,
+		b.UPD_TIME as updDate,
+		b.UPDER as updater,
+		b.DEL_FLAG as delFlag
+	</sql>
+	
+	<!-- 分页查询所有车辆黑名单 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.VehBlackName">
+		select * from(
+			 select a.*,rownum as rowno from(
+			    select <include refid="column"/>,
+			    c.p_cllx,
+			    c.parent_name as parentName,
+			    (case when t.parent_id is null then '变更登记' when t.parent_id is not null then t.type_name end) as operName,
+			    f.organ_name as organName from blacklist b
+			    inner join ck_cllx c on c.cllx = b.cllx
+			    left join oper_type t on t.id = b.curr_opera_type
+			    inner join ck_info i on i.srln = b.srln
+			    inner join chkpt_file f on f.organ_code = i.organ_code
+			    where b.del_flag  = '0'
+				order by b.JOIN_BLACK_TIME desc				
+			  <where>
+			  	<if test="t.cllx != null and t.cllx != ''">
+			  		and c.p_cllx = #{t.cllx}
+			  	</if>
+			  	<if test="t.currOperaType != null and t.currOperaType != ''">
+			  		and (instr(b.curr_opera_type,#{currOperaType}||',') = 1
+			  			or instr(b.curr_opera_type,','||#{currOperaType}||',') > 0
+			  			or b.curr_opera_type = #{currOperaType}
+			  			or length(b.curr_opera_type) = (
+			  				case when length(b.curr_opera_type) = length(#{currOperaType}) then -1
+			  				else length(#{currOperaType}) + instr(b.curr_opera_type,','||#{currOperaType}))
+			  				)
+			  			)
+			  	</if>
+			  	<if test="t.start != null and t.start != ''">
+			  		and b.join_black_time &gt;= #{t.start}
+			  	</if>
+			  	<if test="t.end != null and t.end != ''">
+			  		and b.join_black_time &lt;= #{t.end}
+			  	</if>
+			  </where>
+			  )a
+			  where rownum &lt; = #{pageNo} * #{pageSize}
+		  )s
+		  where s.rowno &gt; = (#{pageNo} - 1) * #{pageSize}
+	</select>
+	
+	<!-- 总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select b.*,c.p_cllx,c.parent_name as parentName,t.type_name as operName from blacklist b
+			    inner join ck_cllx c on c.cllx = b.cllx
+			    left join oper_type t on t.id = b.curr_opera_type			    
+			    inner join ck_info i on i.srln = b.srln
+			    inner join chkpt_file f on f.organ_code = i.organ_code
+			    where b.del_flag  = '0'
+			    order by b.JOIN_BLACK_TIME desc
+			  <where>
+			  	<if test="cllx != null and cllx != ''">
+			  		and c.p_cllx = #{cllx}
+			  	</if>
+			  	<if test="currOperaType != null and currOperaType != ''">
+			  		and (instr(b.curr_opera_type,#{currOperaType}||',') = 1
+			  			or instr(b.curr_opera_type,','||#{currOperaType}||',') > 0
+			  			or b.curr_opera_type = #{currOperaType}
+			  			or length(b.curr_opera_type) = (
+			  				case when length(b.curr_opera_type) = length(#{currOperaType}) then -1
+			  				else length(#{currOperaType}) + instr(b.curr_opera_type,','||#{currOperaType}))
+			  				)
+			  			)
+			  		
+			  	</if>
+			  	<if test="start != null and start != ''">
+			  		b.join_black_time &gt;= #{start}
+			  	</if>
+			  	<if test="end != null and end != ''">
+			  		b.join_black_time &lt;= #{end}
+			  	</if>
+			  </where>
+		)
+	</select>
+	<!-- 查看详情 -->
+	<select id="bNameDetail" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.VehBlackName">
+		 select <include refid="column"/>,
+			    c.p_cllx,
+			    c.parent_name as parentName,
+			    (case when t.parent_id is null then '变更登记' when t.parent_id is not null then t.type_name end) as operName,
+			    f.organ_name as organName,
+       			d.ldictionary_abel as hpzl
+       			from blacklist b
+			    inner join ck_cllx c on c.cllx = b.cllx
+			    left join oper_type t on t.id = b.curr_opera_type
+			    inner join ck_info i on i.srln = b.srln
+			    inner join chkpt_file f on f.organ_code = i.organ_code
+				inner join dict d on d.dict_key = b.hpzl
+				where b.id = #{id} and d.dict_type = 'hpzl'
+	</select>
+	
+	<!-- 查验记录 -->
+	<select id="checkRecord" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.VehBlackName" >
+		select (case when t.parent_id is null then '变更备案' when t.parent_id is not null then t.type_name end) as operName,
+		       c.cllx_name as parentName,
+		       f.organ_name as organName,
+		       i.unqual_anncs unqualAnnc,
+		       to_char(i.crt_time,'yyyy-mm-dd') as chektTime,
+		       v.view_name as viewer,
+		      (select wm_concat(o.pro_name) from ck_project o inner join project_record p on o.id = p.pro_id where p.srln = b.srln and p.ck_flag ='1') as proName
+		from blacklist b 
+		inner join ck_info i on i.clsbdh = b.clsbdh
+		left join oper_type t on t.id = i.oper_type
+		inner join ck_cllx c on c.cllx = i.cllx
+		inner join chkpt_file f on f.organ_code = i.organ_code
+		inner join viewer_file v on v.file_id = i.crter
+		where i.audit_flag = '1' and b.clsbdh = #{clsbdh}	
+	</select>
+	
+	<!-- 解除黑名单（修改删除标志） -->
+	<update id="changeWhite" parameterType="String">
+		update blacklist b set b.del_flag = '1' where rtrim(b.clsbdh) = #{clsbdh}
+	</update>
+</mapper>

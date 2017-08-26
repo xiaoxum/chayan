@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IResourceDao">
+	<!-- 数据库对应字段 -->
+	<sql id="columns">
+		ID as "id",
+		SRLN as "srln2",
+		SYS_NO as "sysNo",
+		RES_UTL as "resUtl",
+		RES_NAME as "resName",
+		HD_TIME as "hdTime",
+		OPERER as "operer",
+		HPHM as "hphm",
+		UPDATE_TIME as "upDateTime",
+		RCK_COUNT as "rckCount",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater", 
+		DEL_FLAG as "delFlag"
+	</sql>
+	
+	<!-- 新增业务影响资料 -->
+	
+	<insert id="insertData" parameterType="com.vkl.ckts.common.entity.ResourceEntity">
+	  insert into RESOURCES(
+	  <selectKey resultType="String" order="BEFORE" keyProperty="id">  
+       SELECT SEQ_APPL.Nextval as id from DUAL  
+        </selectKey> 
+		SRLN,
+		RES_URL,
+		HD_TIME,
+		OPERER,
+		UPDATE_TIME,
+		RCK_COUNT,
+		CRT_TIME,
+		CRTER,
+		UPD_TIME,
+		UPDER, 
+		DEL_FLAG,
+		RES_ID,
+		SYSC
+	  )VALUES(
+		#{srln},
+		#{repicUrl},
+		#{hdTime},
+		#{operer},
+		#{upDateTime},
+		#{rckCount},
+		#{createDate},
+		#{creater},
+		#{updDate},
+		#{updater}, 
+		#{delFlag},
+		#{resId},
+		'0'
+	  )
+	</insert>
+	
+	
+	
+	<select id="findResources"  resultType="com.vkl.ckts.cksy.servacpt.entity.ResProDto">
+	    select
+	        RES_ID   as  "resId",
+	        RES_NAME as  "resName",
+	        HELPINTR as  "helpintr"
+	    from 
+	        RES_PRO 
+	</select>
+	
+	
+	
+	<update id="updateResSc">
+	    update 
+	         RESOURCES 
+	       set
+	          SYSC= '1'
+	      where
+	             SRLN=#{0}
+            and 
+               RCK_COUNT=#{1}
+	        and 
+	           RES_ID=#{2} 
+	</update>
+	
+	
+	<select  id="findResRecord" resultType="com.vkl.ckts.cksy.servacpt.entity.ResourceDto">
+	        select
+	             SRLN           as    "srln",
+	             RES_URL        as    "repicUrl",
+	             HD_TIME        as    "hdTime",
+	             OPERER         as    "operer",
+	             UPDATE_TIME    as    "upDateTime",
+	             RCK_COUNT      as    "rckCount",
+	             CRT_TIME       as    "createDate",
+	             CRTER          as    "creater",
+	             UPD_TIME       as    "updDate",
+	             UPDER          as    "updater",
+	             DEL_FLAG       as    "delFlag",
+	             RES_ID         as    "resId",
+	             SYSC           as    "sysc"
+	        from 
+	             RESOURCES   
+	         
+	         where 
+	             SRLN       =  #{0}
+	           and 
+	             RCK_COUNT  =  #{1}
+	           and 
+	             RES_ID     =  #{2}
+	</select>
+	
+	
+	<update id="updateResInfo">
+	       update 
+	             RESOURCES 
+	         set 
+	             RES_URL=#{repicUrl},
+	             HD_TIME=#{hdTime},
+	             OPERER=#{operer},
+	             UPDATE_TIME=#{upDateTime},
+	             UPD_TIME=#{updDate}
+	         where 
+	             SRLN       =  #{srln}
+	           and 
+	             RCK_COUNT  =  #{rckCount}
+	           and 
+	             RES_ID     =  #{resId}  
+	          
+	        
+	
+	
+	</update>
+	
+</mapper>

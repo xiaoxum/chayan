@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.vehiclereview.dao.IVedioRecordDao">
+	
+	<sql id="column">
+		srln as "srln",
+		VEDIO_URL as "vedioUrl",
+		FW_URL as "fwUrl",
+		INT_URL as "intUrl",
+		VEDIO_ANGLE as "vedioAngle"
+	</sql>
+	<!-- 根据流水号查询 -->
+	<select id="findBySrln" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.VedioRecordDto">
+		select 
+		<include refid="column"></include> 
+		from VEDIO_RECORD  
+		where srln=#{srln}
+		and RCK_COUNT=#{rdkCount}
+	</select>
+	
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.photoinfo.dao.IPhotoDao">
+
+     <select id="findPidInfo" resultType="com.vkl.ckts.cksy.photoinfo.entity.PhotoDto">
+        select*from(
+             select w.*,rownum as rn
+                from 
+			           (
+			           select 
+			              
+			                a.srln                  as       "srln",
+			                a.RCK_COUNT             as       "rckCount",
+			                a.PIC_URL               as       "picUrl",
+			                o.CLSBDH                as       "clsbdh",
+			                o.HPHM                  as       "hphm",
+			                NVL(x.CLLX_NAME, ' ')   as       "cllxName",   
+			                b.type_name             as       "typeName",
+			                a.SFDY                  as        "sfdy",
+			                a.PIC_ID                as        "picId",
+			                ct.PIC_NAME             as         "picName",
+			                to_char(a.PIC_TIME,'yyyy-MM-dd')             as        "picTimeS"
+			           from  
+			                PIC_RECORD  a
+			            inner join 
+			                CK_INFO  o
+			               on 
+			                  o.srln = a.srln
+			                 and 
+			                o.RCK_COUNT=a.RCK_COUNT
+			            inner join 
+			                   CK_CLLX x 
+			                on 
+			                   x.CLLX=o.CLLX
+			           inner join 
+			                    OPER_TYPE b
+		                    on 
+		                         o.oper_type = b.id
+		                inner join
+		                         PIC_PROJECT   ct
+		                     on  
+		                          ct.ID = a.PIC_ID
+                          <where>
+			                  a.RCK_COUNT =(select MAX(rd.RCK_COUNT) from PIC_RECORD rd group by rd.srln having rd.srln=a.srln)
+                                <if test="t.operType!=null and t.operType != ''"> and o.oper_type = #{t.operType} </if>
+								<if test="t.clsbdh!=null and t.clsbdh != '' "> and o.clsbdh like '%'||#{t.clsbdh}||'%'</if>
+								<if test="t.hphm!=null and t.hphm != '' "> and o.hphm like '%'||#{t.hphm}||'%'</if>
+								<if test="t.sfdy!=null and t.sfdy != '' "> and a.sfdy=#{t.sfdy}</if>
+								<if test="t.startTime!=null and t.startTime!='' ">
+									and to_char(a.PIC_TIME,'yyyy-MM-dd') &gt;=#{t.startTime} 
+								</if>
+								 <if test=" t.endTime!=null and t.endTime!=''">
+									and to_char(a.PIC_TIME,'yyyy-MM-dd') &lt;=#{t.endTime}
+								</if>
+								 <if test="t.organCode!=null and t.organCode != ''"> and o.ORGAN_CODE = #{t.organCode} </if>
+								 <if test=" t.picId !=null and t.picId !=''">
+									and a.PIC_ID in
+									<foreach item="picIds" index="index" collection="t.picIds"
+                                     open="(" separator="," close=")"> #{picIds}</foreach>
+									
+								</if>
+                          </where>
+		     	           order by  a.srln,o.CRT_TIME
+		     	           )  w
+         	 where 
+                rownum &lt;=#{pageSize}*#{pageNo}
+           ) we
+        where we.rn &gt;#{pageSize}*(#{pageNo}-1)
+     </select>
+     
+     
+     
+  <select id="findCount" resultType="java.lang.Integer">
+             select count(1) as rn
+                from 
+			           (select 
+			              distinct
+			                a.PIC_URL               as       "picUrl",
+			                o.CLSBDH                as       "clsbdh",
+			                o.HPHM                  as       "hphm",
+			                NVL(x.CLLX_NAME, ' ')   as       "cllxName",   
+			                b.type_name             as       "typeName",
+			                a.SFDY                  as        "sfdy",
+			                a.PIC_ID                as        "picId",
+			                ct.PIC_NAME             as         "picName",
+			                to_char(a.PIC_TIME,'yyyy-MM-dd')             as        "picTimeS"
+			           from  
+			                PIC_RECORD  a
+			            inner join 
+			                CK_INFO  o
+			               on 
+			                  o.srln = a.srln
+			              and 
+			                o.RCK_COUNT=a.RCK_COUNT
+			            inner join 
+			                   CK_CLLX x 
+			                on 
+			                   x.CLLX=o.CLLX
+			           inner join 
+			                    OPER_TYPE b
+		                    on 
+		                         o.oper_type = b.id
+		                inner join
+		                         PIC_PROJECT   ct
+		                     on  
+		                          ct.ID = a.PIC_ID
+                          <where>
+                                 a.RCK_COUNT =(select MAX(rd.RCK_COUNT) from PIC_RECORD rd group by rd.srln having rd.srln=a.srln)
+                                <if test="operType!=null and operType != ''"> and o.oper_type = #{operType} </if>
+								<if test="clsbdh!=null and clsbdh != '' "> and o.clsbdh like '%'||#{clsbdh}||'%'</if>
+								<if test="hphm!=null and hphm != '' "> and o.hphm like '%'||#{hphm}||'%'</if>
+								<if test="sfdy!=null and sfdy != '' "> and a.sfdy=#{sfdy}</if>
+								<if test="startTime!=null and startTime!='' ">
+									and to_char(a.PIC_TIME,'yyyy-MM-dd') &gt;=#{startTime} 
+								</if>
+								<if test="organCode!=null and organCode != ''"> and o.ORGAN_CODE = #{organCode} </if>
+								 <if test=" endTime!=null and endTime!=''">
+									and to_char(a.PIC_TIME,'yyyy-MM-dd') &lt;=#{endTime}
+								</if>
+                          </where>
+                             order by  a.srln,o.CRT_TIME
+		     	           )  w
+     </select>
+
+
+
+     <select id="findPicProject" resultType="com.vkl.ckts.cksy.photoinfo.entity.PicProjectDto" >
+            select
+               ID          as   "picId",
+               PIC_NAME    as   "picName"
+            from 
+               PIC_PROJECT a
+     </select>
+  
+<!-- 更新照片打印状态 -->
+	<update id="updatePicDyStatu">
+	   update 
+	            PIC_RECORD  a
+	   set
+	            a.SFDY='1'
+	   where 
+	               a.SRLN=#{0}
+	            and 
+	               a.RCK_COUNT = #{1}
+	            and 
+	               a.PIC_ID=#{2}
+	</update>
+</mapper>

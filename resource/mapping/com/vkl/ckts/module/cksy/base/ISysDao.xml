@@ -1,0 +1,30 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.cksy.base.dao.ISysDao">
+
+   <!-- 查询当前用户菜单子功能信息 -->
+   <select id="findUserZgx"  resultType="com.vkl.ckts.common.entity.MenuEntity">
+      select 
+      	m.ID      AS "id",
+        m.MENU_FLAG   AS "menuFlag",
+      from
+	        MENU m
+	     inner join 
+	        ROLE_MENU m2
+	     on 
+           m.ID=m2.MENU_ID
+      where 
+        m2.ROLE_ID in(select 
+                       ROLE_ID 
+                  from 
+                       USER_ROLE s
+                  where 
+                       s.USE_ID=#{0}
+                  )
+   </select>
+
+
+
+
+
+
+</mapper>

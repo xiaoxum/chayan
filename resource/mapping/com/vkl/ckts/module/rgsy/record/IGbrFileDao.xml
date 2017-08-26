@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IGbrFileDao">
+	<sql id = "gbrFileColumns">
+		FILE_ID as "fileId",
+		DEVICE_TYPE as "deviceType",
+		CK_VEHS as "ckVehs",
+		MEA_LG as "meaLg",
+		MEA_WG as "meaWg",
+		MEA_HT as "meaHt",
+		FILE_STATU as "fileStatu",
+		LOCAL_STATU as "localStatu",
+		MEA_FACT as "meaFact",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		DEVICE_ORGAN as "deviceOrgan",
+		AUDIT_TIME  as "auditTime",
+		AUDIT_FLAG	as "auditFlag",
+		ID as "id" ,
+		LOGOFF_TIME  as "logoffTime",
+		FILE_TIME  as "fileTime",
+		FILER_RG_JOP  as "filerRgJop",
+		CK_APPLER_JOP  as "fileApplerJop"
+	</sql>
+
+	<!--添加外廓备案申请  -->
+	<insert id="addGbrFile">
+		insert into GBR_FILE(
+			FILE_ID,
+			DEVICE_TYPE,
+			CK_VEHS,
+			MEA_LG,
+			MEA_WG,
+			MEA_HT,
+			FILE_STATU,
+			LOCAL_STATU,
+			MEA_FACT,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			DEVICE_ORGAN,
+			AUDIT_TIME,
+			AUDIT_FLAG,
+			ID,
+			LOGOFF_TIME,
+			FILE_TIME,
+			FILER_RG_JOP,
+			CK_APPLER_JOP
+		) values(
+			#{fileId},
+			#{deviceType},
+			#{ckVehs},
+			#{meaLg},
+			#{meaWg},
+			#{meaHt},
+			#{fileStatu},
+			#{localStatu},
+			#{meaFact},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{deviceOrgan},
+			#{auditTime},
+			#{auditFlag},
+			seq_record.nextval,
+			#{logoffTime},
+			#{fileTime},
+			#{filerRgJop},
+			#{fileApplerJop}
+		)
+	</insert>
+	
+	<!-- 分页查询廓备备案信息 -->
+	<select id="pageGbrFile" resultType="com.vkl.ckts.common.entity.GbrFileEntity">
+		select <include refid="gbrFileColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from GBR_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.fileId != null and t.fileId != ''">
+						and FILE_ID like '%'||#{t.fileId}||'%'
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询廓备备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.GbrFileEntity" resultType="Integer">
+		select count(1) from GBR_FILE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="fileId != null and fileId != ''">
+				and FILE_ID like '%'||#{fileId}||'%'
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据廓备编号逻辑删除备案信息 -->
+	<select id="deleteGbrFileById" parameterType="com.vkl.ckts.common.entity.GbrFileEntity">
+		update GBR_FILE 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</select>
+	
+	<!-- 根据廓备编号查找备案信息 -->
+	<select id="findGbrFileById" resultType="com.vkl.ckts.common.entity.GbrFileEntity">
+		select <include refid = "gbrFileColumns"></include> from GBR_FILE 
+			where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updateGbrFile" parameterType="com.vkl.ckts.common.entity.GbrFileEntity">
+		update GBR_FILE
+		set FILE_ID = #{fileId},
+			DEVICE_TYPE = #{deviceType},
+			CK_VEHS = #{ckVehs},
+			MEA_LG = #{meaLg},
+			MEA_WG = #{meaWg},
+			MEA_HT = #{meaHt},
+			FILE_STATU = #{fileStatu},
+			LOCAL_STATU = #{localStatu},
+			MEA_FACT = #{meaFact},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			DEVICE_ORGAN = #{deviceOrgan},
+			AUDIT_TIME = #{auditTime},
+			AUDIT_FLAG = #{auditFlag},
+			LOGOFF_TIME = #{logoffTime},
+			FILE_TIME = #{fileTime},
+			FILER_RG_JOP = #{filerRgJop},
+			CK_APPLER_JOP = #{fileApplerJop}
+		where ID = #{id}
+	</update>
+</mapper>

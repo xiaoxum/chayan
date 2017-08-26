@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IOperVehProDao">
+	
+	<sql id="Columns">
+	  PRO_ID as "proId",
+	  CLLX as "cllx",
+	  IS_SB as "isSb",
+	  OPER_TYPE as "operType",
+	  VEH_MOD_PRO as "vehModPro",
+	  CARD_TYPE as "cardType",
+	  CRT_TIME as "createDate",
+	  CRTER	as "creater",
+	  UPD_TIME as "updDate",
+	  UPDER as "updater",
+	  DEL_FLAG as "delFlag"
+	</sql>
+	
+	<select id="find" resultType="com.vkl.ckts.common.entity.OperVehProEntity">
+	  select 
+	  <include refid="Columns"></include>
+	  from OPER_VEH_PRO a
+	  where CLLX = #{cllx} and OPER_TYPE = #{operType}  and DEL_FLAG=#{DEL_FLAG_NORMAL}
+	</select>
+	
+</mapper>

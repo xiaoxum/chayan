@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IPleAppDao">
+	<sql id="PleAppColumns">
+		ID as "id",
+		HPZL as "hpzl",
+		HPHM as "hphm",
+		OPER_TYPE as "operType",
+		OW_NAME as "owName",
+		OW_ADDR as "owAddr",
+		OW_POSTCODE as "owPostcode",
+		OW_TELE as "owTele",
+		PLE_PROXY_NAME as "pleProxyName",
+		PLE_PROXY_ADDR as "pleProxyAddr",
+		PLE_PROXY_TELE as "pleProxyTele",
+		PLE_PROXY_POSTCODE as "pleProxyPostcode",
+		PLER_NAME as "plerName",
+		PLER_ADDR as "plerAddr",
+		PLER_POSTCODE as "plerPostcode",
+		PLER_TELE as "plerTele",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		SRLN as "srln",
+		RCK_APPL_COUNT as "rckApplCount"
+		
+	</sql>
+	
+	<!-- 添加质押登记申请表 -->
+	<insert id="addPleApp" parameterType="com.vkl.ckts.common.entity.PleApplEntity">
+	<selectKey resultType="String" order="BEFORE" keyProperty="id">  
+       SELECT SEQ_APPL.Nextval as id from DUAL  
+        </selectKey> 
+		insert into PLE_APPL(
+		ID,
+		HPZL,
+		HPHM,
+		OPER_TYPE,
+		OWN_NAME,
+		OWN_ADDR,
+		OWN_POSTCODE,
+		OWN_IDENDITY,
+		OWN_TELE,
+		PLE_PROXY_NAME,
+		PLE_PROXY_ADDR,
+		PLE_PROXY_TELE,
+		PLE_PROXY_POSTCODE,
+		PLER_NAME,
+		PLER_ADDR,
+		PLER_POSTCODE,
+		PLER_TELE,
+		CRT_TIME,
+		CRTER,
+		UPD_TIME,
+		UPDER,
+		DEL_FLAG,
+		SRLN,
+		RCK_APPL_COUNT,
+		PROXY_NAME,
+		PROXY_ADDR,
+		PROXY_POSTCODE,
+		PROXY_TELE,
+		PLER_IDEN_INDUS,
+		SYXZ
+		)values(
+		#{id},
+		#{hpzl},
+		#{hphm},
+		#{operType},
+		#{owName},
+		#{owAddr},
+		#{owPostcode},
+		#{owIdentity},
+		#{owTele},
+		#{pleProxyName},
+		#{pleProxyAddr},
+		#{pleProxyTele},
+		#{pleProxyPostcode},
+		#{plerName},
+		#{plerAddr},
+		#{plerPostcode},
+		#{plerTele},
+		#{createDate},
+		#{creater},
+		#{updDate},
+		#{updater},
+		#{DEL_FLAG_NORMAL},
+		#{srln},
+		#{rckApplCount},
+		#{proxyName},
+		#{proxyAddr},
+		#{proxyPostcode},
+		#{proxyTele},
+		#{plerIdenIndus},
+		#{syxz}
+		)
+		
+	
+	</insert> 
+
+
+
+
+
+</mapper>

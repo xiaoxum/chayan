@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/com/vkl/ckts=UTF-8
+encoding//src/com/vkl/ckts/wss/client/OutAccess.java=UTF-8
+encoding//src/com/vkl/ckts/wss/client/OutAccessLocator.java=UTF-8
+encoding//src/com/vkl/ckts/wss/client/OutAccessSoap.java=UTF-8
+encoding//src/com/vkl/ckts/wss/client/OutAccessSoapStub.java=UTF-8
+encoding//src/com/vkl/ckts/wss/szclient/DlWebService.java=UTF-8
+encoding//src/com/vkl/ckts/wss/szclient/DlWebServiceLocator.java=UTF-8
+encoding//src/com/vkl/ckts/wss/szclient/DlWebServiceSoap.java=UTF-8
+encoding//src/com/vkl/ckts/wss/szclient/DlWebServiceSoapStub.java=UTF-8
+encoding/<project>=UTF-8

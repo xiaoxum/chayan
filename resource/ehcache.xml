@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="false">
+
+	<diskStore path="C:/dlCache" />
+
+	<defaultCache maxElementsInMemory="10" eternal="false"
+		timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true"
+		maxElementsOnDisk="10000000" diskPersistent="false"
+		diskExpiryThreadIntervalSeconds="120" memoryStoreEvictionPolicy="LRU">
+	</defaultCache>
+
+	<!-- <cache name="org.hibernate.cache.spi.UpdateTimestampsCache" maxElementsInMemory="10" 
+		eternal="false" timeToIdleSeconds="0" timeToLiveSeconds="0" overflowToDisk="true"> 
+		</cache> <cache name="org.hibernate.cache.internal.StandardQueryCache" maxElementsInMemory="10" 
+		eternal="false" timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true"> 
+		</cache> -->
+
+
+	<!-- 自定义缓存 -->
+	<cache name="commcache" maxElementsInMemory="10" eternal="false"
+		timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true">
+	</cache>
+
+	<!-- <cache name="category" maxElementsInMemory="50" eternal="false" timeToIdleSeconds="300" 
+		timeToLiveSeconds="300" overflowToDisk="true"> </cache> <cache name="product" 
+		maxElementsInMemory="500" eternal="false" timeToIdleSeconds="300" timeToLiveSeconds="300" 
+		overflowToDisk="true"> </cache> <cache name="combination" maxElementsInMemory="500" 
+		eternal="false" timeToIdleSeconds="300" timeToLiveSeconds="300" overflowToDisk="true"> 
+		</cache> <cache name="topic" maxElementsInMemory="500" eternal="false" timeToIdleSeconds="300" 
+		timeToLiveSeconds="300" overflowToDisk="true"> </cache> -->
+
+	<cache name="user" maxElementsInMemory="1000" eternal="false"
+		timeToIdleSeconds="1200" timeToLiveSeconds="1200" overflowToDisk="true"></cache>
+</ehcache> 

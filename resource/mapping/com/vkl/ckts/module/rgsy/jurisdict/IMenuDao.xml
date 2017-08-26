@@ -1,0 +1,38 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.jurisdict.dao.IMenuDao">
+	<sql id="MenuColumns">
+		ID as "id",
+		MENU_NAME as "menuName",
+		MENU_FLAG as "menuFlag",
+		MENU_URL as "menuUrl",
+		PARENT_MENU as "parentMenu",
+		MENU_OWER as "menuOwer",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag"
+	</sql>
+	
+	<!-- 查找权限集合（根据当前登录用户的部门类型查找） -->
+	<select id="findMenuList" resultType="com.vkl.ckts.common.entity.MenuEntity" parameterType="com.vkl.ckts.common.entity.MenuEntity">
+		select <include refid="MenuColumns"></include> from MENU 
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL} and MENU_OWER = #{menuOwer}
+		</where>
+	
+	</select>
+	
+	<!-- 根据父类id查找子部门 -->
+	<select id="findMenuListByParentId" resultType="com.vkl.ckts.common.entity.MenuEntity" parameterType="com.vkl.ckts.common.entity.MenuEntity">
+		select <include refid="MenuColumns"></include> from MENU 
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL} <!-- and MENU_OWER = #{menuOwer}  -->and PARENT_MENU = #{parentMenu}
+		</where>
+	</select>
+
+	<!-- 根据id查找权限 -->
+	<select id="findMenuById" resultType="com.vkl.ckts.common.entity.MenuEntity">
+		select <include refid="MenuColumns"></include> from MENU where ID = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IPdaFileDao">
+	<sql id = "pdaFileColumns">
+		FILE_ID as "fileId",
+		DEVICE_NAME as "deviceName",
+		DEVICE_FUNCT as "deviceFunct",
+		DEVICE_ORGAN as "deviceOrgan",
+		DEVICE_MAC as "deviceMac",
+		DEVICE_SERIAL as "deviceSerial",
+		DEVICE_OPERER as "deviceOperer",
+		DEVICE_FILE_TIME as "deviceFileTime",
+		LOCAL_STATU as "localStatu",
+		DEVICE_LOGOFF_TIME as "deviceLogoffTime",
+		SERVER_IP as "serverIp",
+		SERVER_PORT as "serverPort",
+		FILER_RG_JOP as "filerRgJop",
+		FILE_STATU as "fileStatu",
+		DEVICE_TYPE as "deviceType",
+		DEVICE_VENDER as "deviceVender",
+		VENDER_TIME as "venderTime",
+		AUDIT_FLAG as "auditFlag",
+		DEVICE_VENDER_MODEL as "deviceVenderModel",
+		OPER_SYS as "operSys",
+		DEVICE_UT as "deviceUt",
+		CK_APPLER_JOP as "ckApplerJop",
+		AUDIT_TIME as "auditTime",
+		SYS_NAME as "sysName",
+		SYS_EXP as "sysExp",
+		DELELOPER as "deleloper",
+		CA_TIME as "caTime",
+		SERIAL as "serial",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		VER_NO as "verNo",
+		ID as "id"
+	
+	</sql>
+
+     	<sql id = "pdaFileColumnss">
+		a.FILE_ID as "fileId",
+		a.DEVICE_NAME as "deviceName",
+		a.DEVICE_FUNCT as "deviceFunct",
+		a.DEVICE_ORGAN as "deviceOrgan",
+		a.DEVICE_MAC as "deviceMac",
+		a.DEVICE_SERIAL as "deviceSerial",
+		a.DEVICE_OPERER as "deviceOperer",
+		a.DEVICE_FILE_TIME as "deviceFileTime",
+		a.LOCAL_STATU as "localStatu",
+		a.DEVICE_LOGOFF_TIME as "deviceLogoffTime",
+		a.SERVER_IP as "serverIp",
+		a.SERVER_PORT as "serverPort",
+		a.FILER_RG_JOP as "filerRgJop",
+		a.FILE_STATU as "fileStatu",
+		a.DEVICE_TYPE as "deviceType",
+		a.DEVICE_VENDER as "deviceVender",
+		a.VENDER_TIME as "venderTime",
+		a.AUDIT_FLAG as "auditFlag",
+		a.DEVICE_VENDER_MODEL as "deviceVenderModel",
+		a.OPER_SYS as "operSys",
+		a.DEVICE_UT as "deviceUt",
+		a.CK_APPLER_JOP as "ckApplerJop",
+		a.AUDIT_TIME as "auditTime",
+		a.SYS_NAME as "sysName",
+		a.SYS_EXP as "sysExp",
+		a.DELELOPER as "deleloper",
+		a.CA_TIME as "caTime",
+		a.SERIAL as "serial",
+		a.CRT_TIME as "createDate",
+		a.CRTER as "creater",
+		a.UPD_TIME as "updDate",
+		a.UPDER as "updater",
+		a.DEL_FLAG as "delFlag",
+		a.VER_NO as "verNo",
+		a.ID as "id"
+	
+	</sql>
+
+
+
+
+
+	<!--添加pda备案申请  -->
+	<insert id="addPdaFile">
+		insert into PDA_DEVICE_FIFLE(
+			FILE_ID,
+			DEVICE_NAME,
+			DEVICE_FUNCT,
+			DEVICE_ORGAN,
+			DEVICE_MAC,
+			DEVICE_SERIAL,
+			DEVICE_OPERER,
+			DEVICE_FILE_TIME,
+			LOCAL_STATU,
+			DEVICE_LOGOFF_TIME,
+			SERVER_IP,
+			SERVER_PORT,
+			FILER_RG_JOP,
+			FILE_STATU,
+			DEVICE_TYPE,
+			DEVICE_VENDER,
+			VENDER_TIME,
+			AUDIT_FLAG,
+			DEVICE_VENDER_MODEL,
+			OPER_SYS,
+			DEVICE_UT,
+			CK_APPLER_JOP,
+			AUDIT_TIME,
+			SYS_NAME,
+			SYS_EXP,
+			DELELOPER,
+			CA_TIME,
+			SERIAL,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			VER_NO,
+			ID
+		) values(
+			#{fileId},
+			#{deviceName},
+			#{deviceFunct},
+			#{deviceOrgan},
+			#{deviceMac},
+			#{deviceSerial},
+			#{deviceOperer},
+			#{deviceFileTime},
+			#{localStatu},
+			#{deviceLogoffTime},
+			#{serverIp},
+			#{serverPort},
+			#{filerRgJop},
+			#{fileStatu},
+			#{deviceType},
+			#{deviceVender},
+			#{venderTime},
+			#{auditFlag},
+			#{deviceVenderModel},
+			#{operSys},
+			#{deviceUt},
+			#{ckApplerJop},
+			#{auditTime},
+			#{sysName},
+			#{sysExp},
+			#{deleloper},
+			#{caTime},
+			#{serial},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{verNo},
+			seq_record.nextval
+		)
+	</insert>
+	
+	<!-- 分页查询pda备案信息 -->
+	<select id="pagePdaFile" resultType="com.vkl.ckts.rgsy.record.entity.PdaDeviceFifleDto">
+		select 
+		      *
+		 from (
+			select rownum as rowno,a.* from (
+				select 
+				   <include refid="pdaFileColumnss"/>
+				  ,b.ORGAN_NAME  from 
+				    PDA_DEVICE_FIFLE a
+				   inner join
+				        CHKPT_FILE  b
+				       on  
+				         b.ORGAN_CODE = a.SERIAL
+				<where>
+					a.DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.fileId != null and t.fileId != ''">
+						and a.FILE_ID like '%'||#{t.fileId}||'%'
+					</if>
+					<if test = "t.serial != null and t.serial != ''">
+						and a.SERIAL like '%'||#{t.serial}||'%'
+					</if>
+				</where>
+				order by a.UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询pda备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.PdaDeviceFifleEntity" resultType="Integer">
+		select count(1) from PDA_DEVICE_FIFLE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="fileId != null and fileId != ''">
+				and FILE_ID like '%'||#{fileId}||'%'
+			</if>
+			<if test = "serial != null and serial != ''">
+				and SERIAL like '%'||#{serial}||'%'
+			</if>			
+		</where>
+	</select>
+	
+	<!-- 根据pda编号逻辑删除备案信息 -->
+	<select id="deletePdaFileById" parameterType="com.vkl.ckts.common.entity.PdaDeviceFifleEntity">
+		update PDA_DEVICE_FIFLE 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</select>
+	
+	<!-- 根据pda编号查找备案信息 -->
+	<select id="findPdaFileById" resultType="com.vkl.ckts.common.entity.PdaDeviceFifleEntity">
+		select <include refid = "pdaFileColumns"></include> from PDA_DEVICE_FIFLE 
+			where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updatePdaFile" parameterType="com.vkl.ckts.common.entity.PdaDeviceFifleEntity">
+		update PDA_DEVICE_FIFLE
+		set FILE_ID = #{fileId},
+			DEVICE_NAME = #{deviceName},
+			DEVICE_FUNCT = #{deviceFunct},
+			DEVICE_ORGAN = #{deviceOrgan},
+			DEVICE_MAC = #{deviceMac},
+			DEVICE_SERIAL = #{deviceSerial},
+			DEVICE_OPERER = #{deviceOperer},
+			DEVICE_FILE_TIME = #{deviceFileTime},
+			LOCAL_STATU = #{localStatu},
+			DEVICE_LOGOFF_TIME = #{deviceLogoffTime},
+			SERVER_IP = #{serverIp},
+			SERVER_PORT = #{serverPort},
+			FILER_RG_JOP = #{filerRgJop},
+			FILE_STATU = #{fileStatu},
+			DEVICE_TYPE = #{deviceType},
+			DEVICE_VENDER = #{deviceVender},
+			VENDER_TIME = #{venderTime},
+			AUDIT_FLAG = #{auditFlag},
+			DEVICE_VENDER_MODEL = #{deviceVenderModel},
+			OPER_SYS = #{operSys},
+			DEVICE_UT = #{deviceUt},
+			CK_APPLER_JOP = #{ckApplerJop},
+			AUDIT_TIME = #{auditTime},
+			SYS_NAME = #{sysName},
+			SYS_EXP = #{sysExp},
+			DELELOPER = #{deleloper},
+			CA_TIME = #{caTime},
+			SERIAL = #{serial},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			VER_NO = #{verNo}
+		where ID = #{id}
+	</update>
+	
+	
+	
+		
+	<select id="findPdaFileByMac" resultType="com.vkl.ckts.common.entity.PdaDeviceFifleEntity">
+	    select <include refid = "pdaFileColumns"></include> from PDA_DEVICE_FIFLE 
+			where 
+			      DEVICE_MAC = #{0}
+			 and 
+			      DEL_FLAG = '0'
+	</select>
+</mapper>

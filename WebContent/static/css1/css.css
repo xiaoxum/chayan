@@ -1,0 +1,126 @@
+@charset "utf-8";
+/* CSS Document */
+
+.top{ height:66px;}
+.topmenu{ height:40px;}
+.logo{ background:url(../images/new/logo.png) no-repeat; height:66px; width:540px; float:left; }
+.top .list{ float:right; height:66px;}
+ul{ list-style:none;}
+.list ul li{ float:left; padding:10px;}
+.list_home, .list_pople, .list-date,.list_uppwd,.list_sys{  height:24px; padding-left:30px; padding-top:8px; color:#cfe2f3;}
+.list_home{ background:url(../images/new/home.png) no-repeat;}
+.list_pople{ background:url(../images/new/pople.png) no-repeat;}
+.bgone{ background-image:url(../images/new/404.jpg);}
+.bgtwo{ background-image:url(../images/new/500.jpg);}
+.bgone, .bgtwo{ background-repeat:no-repeat; height:613px; background-position:center center; position:relative;}
+.btnexit{position:relative; display:block; background:url(../images/new/exit.png) no-repeat; height:32px; width:78px; color:#fff; padding-top:4px; text-align:center; font-weight:bold; }
+.btnexit:hover{ background:url(../images/new/exit_over.png) no-repeat;}
+.topbtn{    
+    color: #1A4F7C;
+    /*background: #fafafa;*/
+    background-repeat: repeat-x;
+    border: 1px solid #005aa9;
+    /*background: -webkit-linear-gradient(top,#f2f8fd 0,#d7edff 100%);
+    background: -moz-linear-gradient(top,#f2f8fd 0,#d7edff 100%);
+    background: -o-linear-gradient(top,#f2f8fd 0,#d7edff 100%);
+    background: linear-gradient(to bottom,#f2f8fd 0,#d7edff 100%);
+    background-repeat: repeat-x;*/
+	-moz-box-shadow: 2px 2px 1px #9fa7af; /* 老的 Firefox */
+    box-shadow: 2px 2px 1px #9fa7af;}
+.topbtn .l-btn-text{ line-height:32px; font-size:14px; }
+.active, .topbtn:hover{ background:#267bc5; color:#fff;}
+.meunbtn{
+	font-size:14px;
+	color:#1A4F7C;
+	text-align:center;
+	line-height:40px;
+	width:218px;
+	height:40px; 
+	background-image:url(../images/menubtn.png);
+	margin-bottom:10px;
+    }
+.meunbtn:hover{ 
+    cursor:pointer;
+	background-image:url(../images/menubtnover.png);
+	}
+
+	
+.sqbtn{
+	font-size:14px;
+	color:#1A4F7C;
+	text-align:center;
+	line-height:40px;
+	width:218px;
+	height:40px; 
+	background-image:url(../images/menubtn.png);
+	margin-bottom:10px;
+    }
+.sqbtn:hover{ background-image:url(../images/menubtnover.png);}	
+.title{
+    width: 100%;overflow: hidden;
+    color: #368ee0;
+}
+.bgc{ background-color:#eef6fd; text-align:right; padding-right:10px;font-weight: bold;  }
+.easyui-panel table, .tabs-panels table, .easyui-accordion table{border:solid 0px #b1c6d7;}
+.easyui-panel table td, .tabs-panels table td, .tabs-panels table th, .easyui-panel table th, .easyui-accordion table td, .easyui-accordion table th{border-top: solid 1px #b1c6d7;
+    height: 30px;
+    border-right: solid 1px #b1c6d7;
+	line-height:30px;
+	padding-left:5px;}
+.easyui-panel table thead th, .tabs-panels table thead th, .easyui-accordion table thead th{ 
+	/*  background:url(../images/new/tablebg.png) repeat-x; */
+	background:#e0f1fb;
+	 line-height:30px;  
+	 text-align: center;
+	 }
+button{ background:url(../images/new/tabbg.png) repeat-x; height:24px; border:1px solid #005aa9; color:#005aa9; line-height:24px; padding:0 15px; margin:2px; -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;}
+button:hover{ background:url(../images/new/tabbg-over.png) repeat-x;}
+.marginl20{ margin-left:20px;}
+.labels{width: 150px; display: inline-table;}
+.rowbg-yc{ background:#FC6;}
+.ztcolor{color: #2079c6; cursor:pointer;}
+.ztcolor:hover{color: #009cdd;}
+.trbgcolor{ background:#f5f5f5;}
+.star{ color:#F00; margin-right:10px;}
+.ycbj{ 
+background: url(../images/light-bulb.png) no-repeat;
+    float: right;
+    margin: 8px 10px 0;
+    color:#F63;
+    font-size: 14px;
+    padding: 0 20px 0 20px;
+	cursor: pointer;}
+.sybg{ background-image:url(../images/new/sybg.jpg); background-repeat:no-repeat; height:613px; width:1008px; background-position:center center;}
+.menubg{ background:url(../images/new/menubg.jpg) repeat-y; }
+.texcenter{ text-align:center;}
+.texright{ text-align:right;}
+.icon-xt, .icon-yw, .icon-tj, .icon-ba{   
+    display: inline-block;
+    height: 26px;
+    width: 100px;
+    line-height: 26px;
+    padding: 2px 0 0 8px;}
+.icon-xt{ background:url(../images/new/xtong.png) no-repeat;}
+.icon-yw{ background:url(../images/new/ywu.png) no-repeat;}
+.icon-tj{ background:url(../images/new/tji.png) no-repeat;}
+.icon-ba{ background:url(../images/new/ban.png) no-repeat;}
+.rowbgcolor{ background:#f5f5f5;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

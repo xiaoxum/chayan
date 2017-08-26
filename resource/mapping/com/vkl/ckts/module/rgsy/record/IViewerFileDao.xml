@@ -1,0 +1,240 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IViewerFileDao">
+	<sql id = "ViewerFileColumns">
+		FILE_ID as "fileId",
+		ORGAN as "organ",
+		VIEWER_RANK as "viewerRank",
+		VIEW_NAME as "viewName",
+		IS_POLICE as "isPolice",
+		FILE_STATU as "fileStatu",
+		VALID_START_TIME as "validStartTime",
+		VALID_END_TIME as "validEndTime",
+		POLICE_ID as "policeId",
+		VIEWER_SEX as "viewerSex",
+		IDENTITY as "identity",
+		VIEW_EMAIL as "viewEmail",
+		VIEW_PHONE as "viewPhone",
+		LOGIN_IP as "loginIp",
+		LOGIN_NAME as "loginName",
+		LOGIN_PWD as "loginPwd",
+		VIEW_ADDR as "viewAddr",
+		FILER_RG_JOP as "filerRgJop",
+		FILE_RG_TIME as "fileRgTime",
+		LOGOFF as "logoff",
+		FILE_APPLER_JOP as "fileApplerJop",
+		FILE_APPL_TIME as "fileApplTime",
+		LOCAL_STATU as "localStatu",
+		VALID_INTR_NAME as "validIntrName",
+		VALID_ID as "validId",
+		USNRS as "usnrs",
+		OPER_TYPES as "operTypes",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		C_CLLXS as "cCllxs",
+		AUDIT_FLAG as "auditFlag",
+		ID as "id",
+		PERMISSION_FLAG  as  "permissionFlag"
+	</sql>
+	
+	<!-- 添加查验员备案申请 -->
+	<insert id = "addViewerFile">
+		insert into VIEWER_FILE(
+			FILE_ID,
+			ORGAN,
+			VIEWER_RANK,
+			VIEW_NAME,
+			IS_POLICE,
+			FILE_STATU,
+			VALID_START_TIME,
+			VALID_END_TIME,
+			POLICE_ID,
+			VIEWER_SEX,
+			IDENTITY,
+			VIEW_EMAIL,
+			VIEW_PHONE,
+			LOGIN_IP,
+			LOGIN_NAME,
+			LOGIN_PWD,
+			VIEW_ADDR,
+			FILER_RG_JOP,
+			FILE_RG_TIME,
+			LOGOFF,
+			FILE_APPLER_JOP,
+			FILE_APPL_TIME,
+			LOCAL_STATU,
+			VALID_INTR_NAME,
+			VALID_ID,
+			USNRS,
+			OPER_TYPES,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			C_CLLXS,
+			AUDIT_FLAG,
+			ID,
+			PERMISSION_FLAG
+		) values(
+			#{fileId},
+			#{organ},
+			#{viewerRank},
+			#{viewName},
+			#{isPolice},
+			#{fileStatu},
+			#{validStartTime},
+			#{validEndTime},
+			#{policeId},
+			#{viewerSex},
+			#{identity},
+			#{viewEmail},
+			#{viewPhone},
+			#{loginIp},
+			#{loginName},
+			#{loginPwd},
+			#{viewAddr},
+			#{filerRgJop},
+			#{fileRgTime},
+			#{logoff},
+			#{fileApplerJop},
+			#{fileApplTime},
+			#{localStatu},
+			#{validIntrName},
+			#{validId},
+			#{usnrs},
+			#{operTypes},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{cCllxs},
+			#{auditFlag},
+			seq_record.nextval,						   
+		    #{permissionFlag}
+		)
+	</insert>
+	
+	<!-- 分页查询查验员备案信息 -->
+	<select id = "pageViewerFile" resultType = "com.vkl.ckts.rgsy.record.entity.ViewerFileDto">
+		select * from (
+			select rownum as rowno,a.* from (
+				select * from VIEWER_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.viewName != null and t.viewName != ''">
+						and VIEW_NAME like '%'||#{t.viewName}||'%'
+					</if>
+					<if test = "t.validId != null and t.validId!=''">
+						and VALID_ID like '%'||#{t.validId}||'%'
+					</if>
+					<if test = "t.organ != null and t.organ != ''">
+						and ORGAN = #{t.organ}
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+			
+	</select>
+	
+	<!-- 查询查验员备案信息总记录数 -->
+	<select id = "findCount" parameterType = "com.vkl.ckts.common.entity.ViewerFileEntity" resultType = "Integer">
+		select count(1) from VIEWER_FILE 
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test = "viewName != null and viewName != ''">
+				and VIEW_NAME like '%'||#{viewName}||'%'
+			</if>
+			<if test = "validId != null and validId != ''">
+				and VALID_ID like '%'||#{validId}||'%'
+			</if>
+			<if test = "organ != null and organ != ''">
+				and ORGAN = #{organ}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据申请id逻辑删除备案信息 -->
+	<update id = "deleteViewerFileById" parameterType = "com.vkl.ckts.common.entity.ViewerFileEntity">
+		update VIEWER_FILE 
+		set DEL_FLAG = #{DEL_FLAG_DELETE} 
+		where ID = #{id}
+	</update>
+	
+	<!-- 根据申请id查找备案信息-->
+	<select id = "findViewerFileById" resultType = "com.vkl.ckts.rgsy.record.entity.ViewerFileDto">
+		select <include refid = "ViewerFileColumns"></include> from VIEWER_FILE 
+		where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id = "updateViewerFile">
+		update VIEWER_FILE 
+		set FILE_ID = #{fileId},
+			ORGAN = #{organ},
+			VIEWER_RANK = #{viewerRank},
+			VIEW_NAME = #{viewName},
+			IS_POLICE = #{isPolice},
+			FILE_STATU = #{fileStatu},
+			VALID_START_TIME = #{validStartTime},
+			VALID_END_TIME = #{validEndTime},
+			POLICE_ID = #{policeId},
+			VIEWER_SEX = #{viewerSex},
+			IDENTITY = #{identity},
+			VIEW_EMAIL = #{viewEmail},
+			VIEW_PHONE = #{viewPhone},
+			LOGIN_IP = #{loginIp},
+			LOGIN_NAME = #{loginName},
+			LOGIN_PWD = #{loginPwd},
+			VIEW_ADDR = #{viewAddr},
+			FILER_RG_JOP = #{filerRgJop},
+			FILE_RG_TIME = #{fileRgTime},
+			LOGOFF = #{logoff},
+			FILE_APPLER_JOP = #{fileApplerJop},
+			FILE_APPL_TIME = #{fileApplTime},
+			LOCAL_STATU = #{localStatu},
+			VALID_INTR_NAME = #{validIntrName},
+			VALID_ID = #{validId},
+			USNRS = #{usnrs},
+			OPER_TYPES = #{operTypes},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			C_CLLXS = #{cCllxs},
+			PERMISSION_FLAG= #{permissionFlag}
+		where ID = #{id}
+	
+	</update>
+	
+	<!-- 根据条件查找相应查验区备案通过的查验员 -->
+	<select id="findViewerFileList" resultType="com.vkl.ckts.rgsy.record.entity.ViewerFileDto">
+		select FILE_ID as "fileId", VIEW_NAME as "viewName"  from VIEWER_FILE 
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL}
+				<if test="organ != null and organ != ''">
+					and ORGAN = #{organ}
+				</if>
+				<if test="auditFlag != null and auditFlag != ''">
+					and AUDIT_FLAG = #{auditFlag}
+				</if>
+			</where> 
+	</select>
+	
+	<!-- 根据备案编号查找查验员 -->
+	<select id="findViewerFileByFileId" resultType="com.vkl.ckts.rgsy.record.entity.ViewerFileDto">
+		select FILE_ID as "fileId", VIEW_NAME as "viewName"  from VIEWER_FILE 
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL}
+				<if test="fileId != null and fileId != ''">
+					and FILE_ID = #{fileId}
+				</if>
+			</where>
+	</select>
+</mapper>

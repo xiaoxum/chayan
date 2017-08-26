@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.ICkInfoEntityDao">
+	<sql id="Columns">
+		    SRLN as "srln",
+			SYS_NO as "sysNo",
+			OPER_TYPE as "operType",
+			HPZL as "hpzl",
+			HPHM as "hphm",
+			ORGAN_CODE as "organCode",
+			CKER as "cker",
+			AUDIT_TIME as "auditTime",
+			AUDIT_FLAG as "auditFlag",
+			SYXZ as "syxz",
+			CLSBDH as "clsbdh",
+			ASTS as "asts",
+			IS_IMPL as "isImpl",
+			REMAKS_INFO as "remaks",
+			OPERAER as "operaer",
+			APPL_ID as "applId",
+			CLLX as "cllx",
+			P_AUDITER as "pAuditer",
+			P_AUDIT_TIME as "pAuditTime",
+			IS_P_AUDIT as "isPAudit",
+			P_AUDIT_FLAG as "pAuditFlag",
+			CRT_TIME as "crtTime",
+			CRTER as "crter",
+			DEL_FLAG as "delFlag",
+			PDA_START as "pdaStart",
+			PDA_END as "pdaEnd",
+			OPER_STATU as "operStatu",
+			RCK_TIME as "rckTime",
+			RCK_COUNT as "rckCount",
+			SFDY as "sfdy"
+		
+		
+	</sql>
+	<!-- 插入查验信息 -->
+	<insert id="insertData">
+		insert into 
+		CK_INFO(
+			SRLN,
+			SYS_NO,
+			OPER_TYPE,
+			HPZL,
+			HPHM,
+			ORGAN_CODE,
+			CKER,
+			AUDIT_TIME,
+			AUDIT_FLAG,
+			SYXZ,
+			CLSBDH,
+			ASTS,
+			IS_IMPL,
+			REMAKS_INFO,
+			OPERAER,
+			APPL_ID,
+			CLLX,
+			P_AUDITER,
+			P_AUDIT_TIME,
+			IS_P_AUDIT,
+			P_AUDIT_FLAG,
+			CRT_TIME,
+			CRTER,
+			DEL_FLAG,
+			PDA_START,
+			PDA_END,
+			OPER_STATU,
+			RCK_TIME,
+			RCK_COUNT,
+			SFDY
+		)values(
+			#{srln},
+			#{sysNo},
+			#{operType},
+			#{hpzl},
+			#{hphm},
+			#{organCode},
+			#{cker},
+			#{auditTime},
+			#{auditFlag},
+			#{syxz},
+			#{clsbdh},
+			#{asts},
+			#{isImpl},
+			#{remaksInfo},
+			#{operaer},
+			#{applId},
+			#{cllx},
+			#{pAuditer},
+			#{pAuditTime},
+			#{isPAudit},
+			#{pAuditFlag},
+			#{createDate},
+			#{creater},
+			#{delFlag},
+			#{pdaStartTime},
+			#{pdaEndTime},
+			#{operStatu},
+			#{rckTime},
+			#{rckCount},
+			#{sfdy}
+			
+		)
+	
+	
+	</insert>
+	<!--根据流水查询查验信息  -->
+	<select id="findckinfobysrln" resultType="com.vkl.ckts.common.entity.CkInfoEntity">
+	  select 
+	  <include refid="Columns"></include>
+	  from CK_INFO where SRLN = #{srln} and RCK_COUNT =#{rckCount}
+	</select>
+	
+	
+     <sql id="ColumnsDto">
+      a.srln as srln ,
+      a.hphm as hphm,
+      a.hpzl as hpzl,
+      a.clsbdh as clsbdh,
+      c.clpp1 as ppxh,
+      b.ow_name as name,
+      a.oper_type as operType ,
+      a.crt_time as createDate,
+      a.CLLX     as cllx
+         <!-- case 
+          when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='X' then (select type_name from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))
+          when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='Z' then (select type_name from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))
+          when (select parent_id from  oper_type where id = substr((select oper_type from CK_INFO where srln=#{srln}),0,instr((select oper_type from CK_INFO where srln=#{srln}),',')-1))='Y' then (select type_name from  oper_type where id = substr((select oper_type from CK_INFO where srln=#{srln}),0,instr((select oper_type from CK_INFO where srln=#{srln}),',')-1))
+           end  as operType ,
+               case 
+             when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='X' then (select ow_name from oper_appl where srln=#{srln} )
+              when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='Z' then (select own_name from PLE_APPL where srln=#{srln})
+              when (select parent_id from  oper_type where id = substr((select oper_type from CK_INFO where srln=#{srln}),0,instr((select oper_type from CK_INFO where srln=#{srln}),',')-1))='Y' then (select ow_name from CH_ITEM where srln=#{srln})
+              end  as name ,
+               case 
+              when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='X' then (select ow_phone from oper_appl where srln=#{srln} )
+              when (select parent_id from  oper_type where id = (select oper_type from CK_INFO where srln=#{srln}))='Z' then (select own_tele from PLE_APPL where srln=#{srln})
+              when (select parent_id from  oper_type where id = substr((select oper_type from CK_INFO where srln=#{srln}),0,instr((select oper_type from CK_INFO where srln=#{srln}),',')-1))='Y' then (select ow_phone from CH_ITEM where srln=#{srln})
+              end  as phone  -->
+     </sql>
+     
+    <!--根据流水查询业务打印信息  -->
+    <select id="findbysrln" resultType="com.vkl.ckts.cksy.servacpt.entity.CkInfoDto">
+      select 
+      <include refid="ColumnsDto"></include>
+      from CK_INFO a 
+      inner join VEH_INFO c
+      on a.srln = c.srln
+      inner join oper_appl b
+      on a.srln = b.srln
+      where a.srln = #{srln} and a.RCK_COUNT =#{rckCount}
+    </select>
+  
+      <select id="findCkInfoByCd" resultType="com.vkl.ckts.cksy.servacpt.entity.CkInfoDto">
+	   select 
+           b.srln,
+           b.clsbdh
+       from 
+       
+         (select
+            a.srln as srln ,
+	        a.hphm as hphm,
+	        a.hpzl as hpzl,
+	        a.clsbdh as clsbdh,
+	        a.oper_type as operType ,
+	        a.crt_time as createDate
+            , to_char(a.CRT_TIME,'yyyy-MM-dd') as  slsj
+          from 
+             CK_INFO a
+          where 
+                 a.CLSBDH=#{0}
+         <!--     and 
+                 a.OPER_STATU != 5 -->
+             and 
+                 a.AUDIT_FLAG != '0'    
+            
+         ) b
+       
+	   where 
+	         b.slsj =#{1}
+	         
+	</select>
+	 <update id="updateCkInfo">
+	      update 
+	       CK_INFO 
+	      set 
+	         hphm=#{hphm},
+	         hpzl=#{hpzl},
+	         clsbdh=#{clsbdh},
+	         oper_type=#{operType},
+	         CLLX=#{cllx},
+	         SYXZ=#{syxz}
+	      where 
+	      srln=#{srln}
+	      and RCK_COUNT=#{rckCount}    
+	 </update>
+  
+  
+</mapper>

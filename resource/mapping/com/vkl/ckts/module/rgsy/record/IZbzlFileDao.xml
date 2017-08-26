@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IZbzlFileDao">
+	<sql id = "zbzlFileColumns">
+		FILE_ID as "fileId",
+		CLYSCQY as "clyscqy",
+		CLYXH as "clyxh",
+		CLYJDYXQZ as "clyjdyxqz",
+		CLYQYSJ as "clyqysj",
+		FILE_STATU as "fileStatu",
+		CLYBH as "clybh",
+		CLYJDZSBH as "clyjdzsbh",
+		CYCLLX as "cycllx",
+		CLFWXX as "clfwxx",
+		CLFWSX as "clfwsx",
+		LOCAL_STATU as "localStatu",
+		TYYY as "tyyy",
+		JBR as "jbr",
+		FZJG as "fzjg",
+		GLBM as "glbm",
+		SYGLBM as "syglbm",
+		ID as "id" ,
+		AUDIT_TIME  as "auditTime",
+		AUDIT_FLAG	as "auditFlag",
+		FILE_TIME  as "fileTime",
+		FILER_RG_JOP  as "filerRgJop",
+		LOGOFF_TIME  as "logoffTime",
+		CK_APPLER_JOP  as "fileApplerJop",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag"
+	</sql>
+
+	<!--添加整备质量备案申请  -->
+	<insert id="addZbzlFile">
+		insert into ZBZL_FILE(
+			FILE_ID ,
+			CLYSCQY ,
+			CLYXH ,
+			CLYJDYXQZ ,
+			CLYQYSJ ,
+			FILE_STATU ,
+			CLYBH ,
+			CLYJDZSBH ,
+			CYCLLX ,
+			CLFWXX ,
+			CLFWSX ,
+			LOCAL_STATU ,
+			TYYY ,
+			JBR ,
+			FZJG ,
+			GLBM ,
+			SYGLBM ,
+			ID ,
+			AUDIT_TIME ,
+			AUDIT_FLAG ,
+			FILE_TIME ,
+			FILER_RG_JOP ,
+			LOGOFF_TIME ,
+			CK_APPLER_JOP ,
+			CRT_TIME ,
+			CRTER ,
+			UPD_TIME ,
+			UPDER ,
+			DEL_FLAG 
+		) values(
+			#{fileId},
+			#{clyscqy},
+			#{clyxh},
+			#{clyjdyxqz},
+			#{clyqysj},
+			#{fileStatu},
+			#{clybh},
+			#{clyjdzsbh},
+			#{cycllx},
+			#{clfwxx},
+			#{clfwsx},
+			#{localStatu},
+			#{tyyy},
+			#{jbr},
+			#{fzjg},
+			#{glbm},
+			#{syglbm},
+			seq_record.nextval ,
+			#{auditTime},
+			#{auditFlag},
+			#{fileTime},
+			#{filerRgJop},
+			#{logoffTime},
+			#{fileApplerJop},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag}
+		)
+	</insert>
+	
+	<!-- 分页查询整备质量备案信息 -->
+	<select id="pageZbzlFile" resultType="com.vkl.ckts.common.entity.ZbzlFileEntity">
+		select <include refid="zbzlFileColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from ZBZL_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.clyscqy != null and t.clyscqy != ''">
+						and CLYSCQY like '%'||#{t.clyscqy}||'%'
+					</if>
+					<if test = "t.clyxh != null and t.clyxh != ''">
+						and CLYXH like '%'||#{t.clyxh}||'%'
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询整备质量备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.ZbzlFileEntity" resultType="Integer">
+		select count(1) from ZBZL_FILE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+				<if test = "clyscqy != null and clyscqy != ''">
+					and CLYSCQY like '%'||#{clyscqy}||'%'
+				</if>
+				<if test = "clyxh != null and clyxh != ''">
+					and CLYXH like '%'||#{clyxh}||'%'
+				</if>
+		</where>
+	</select>
+	
+	<!-- 根据整备质量编号逻辑删除备案信息 -->
+	<select id="deleteZbzlFileById" parameterType="com.vkl.ckts.common.entity.ZbzlFileEntity">
+		update ZBZL_FILE 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</select>
+	
+	<!-- 根据整备质量编号查找备案信息 -->
+	<select id="findZbzlFileById" resultType="com.vkl.ckts.common.entity.ZbzlFileEntity">
+		select <include refid = "zbzlFileColumns"></include> from ZBZL_FILE 
+			where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updateZbzlFile" parameterType="com.vkl.ckts.common.entity.ZbzlFileEntity">
+		update ZBZL_FILE
+		set FILE_ID = #{fileId},
+			CLYSCQY = #{clyscqy},
+			CLYXH = #{clyxh},
+			CLYJDYXQZ = #{clyjdyxqz},
+			CLYQYSJ = #{clyqysj},
+			FILE_STATU = #{fileStatu},
+			CLYBH = #{clybh},
+			CLYJDZSBH = #{clyjdzsbh},
+			CYCLLX = #{cycllx},
+			CLFWXX = #{clfwxx},
+			CLFWSX = #{clfwsx},
+			LOCAL_STATU = #{localStatu},
+			TYYY = #{tyyy},
+			JBR = #{jbr},
+			FZJG = #{fzjg},
+			GLBM = #{glbm},
+			SYGLBM = #{syglbm},
+			AUDIT_TIME  = #{auditTime},
+			AUDIT_FLAG	= #{auditFlag},
+			FILE_TIME  = #{fileTime},
+			FILER_RG_JOP  = #{filerRgJop},
+			LOGOFF_TIME  = #{logoffTime},
+			CK_APPLER_JOP  = #{fileApplerJop},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag}
+		where ID = #{id}
+	</update>
+</mapper>

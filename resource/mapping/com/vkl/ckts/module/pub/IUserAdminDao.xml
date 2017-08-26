@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.pub.dao.IUserAdminDao">
+	<select id="findAll" resultType="com.vkl.ckts.pub.dto.UserAdmin">
+		select * from (
+			select a.*, rownum as rowno from(
+				select distinct u.id as id,
+					NVL(u.user_name,' ') as userName,
+					NVL(u.fuzz,' ') as fuzz,
+					u.login_name as loginName ,
+					NVL(u.user_sex,' ') as userSex,
+					u.user_statu as userStatu,
+         			NVL(d.dept_name,' ') as deptName,
+         			u.upd_time,
+					NVL((select wm_concat(o.role_name) 
+		            from user_role r inner join role  o on r.role_id= o.id 
+		            where r.use_id = u.id),' ') as uRole 
+					from users u
+                    inner join dept d on d.id = u.user_dept
+                    left join user_role r on r.use_id =u.id
+					<where>
+					u.SFGLY != '1'
+					
+                    and u.del_flag =#{t.delFlag} 
+                   
+<!--                     
+                    and u.user_Dept = #{t.userDept}
+ -->				    <if test="t.uRole != null and t.uRole != ''">
+							and r.role_id = #{t.uRole}  
+						</if>
+						<if test="t.userName != null and t.userName != ''">
+							and u.user_name like '%'||#{t.userName}||'%'
+						</if>
+						<!-- <if test="t.userDept != null and t.userDept != ''">
+							and u.user_Dept = #{t.userDept}
+						</if> -->
+					</where>
+					<if test="t.userDept !=null and t.userDept !='' ">
+					   START WITH d.id = #{t.userDept} CONNECT BY d.parent_id = PRIOR d.id
+					</if>
+					order by u.upd_time
+			)a where rownum &lt;= #{pageNo} * #{pageSize}
+		)b where b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+	</select>
+	
+	<!-- 查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+	
+	
+	
+		select count(1) from
+		(select 
+		    distinct u.id as id,
+					NVL(u.user_name,' ') as userName,
+					NVL(u.fuzz,' ') as fuzz,
+					u.login_name as loginName ,
+					NVL(u.user_sex,' ') as userSex,
+					u.user_statu as userStatu,
+         			NVL(d.dept_name,' ') as deptName,
+         			u.upd_time,
+					NVL((select wm_concat(o.role_name) 
+		            from user_role r inner join role  o on r.role_id= o.id 
+		            where r.use_id = u.id),' ') as uRole 
+		from users u
+                    inner join dept d on d.id = u.user_dept
+                    left join user_role r on r.use_id =u.id 
+			<where>
+			   u.SFGLY != '1'
+                  and u.del_flag =#{delFlag}<!--  and u.user_Dept = #{userDept} -->
+				<if test="uRole != null and uRole != ''">
+					and r.role_id = #{uRole}  
+				</if>
+				<if test="userName != null and userName != ''">
+					and u.user_name like '%'||#{userName}||'%'
+				</if>
+				<!-- <if test="t.userDept != null and t.userDept != ''">
+					and u.user_Dept = #{t.userDept}
+				</if> -->
+			</where>
+			START WITH d.id = #{userDept} CONNECT BY d.parent_id = PRIOR d.id
+			) a
+	</select>
+	
+	<resultMap type="com.vkl.ckts.pub.dto.UserAdmin" id="moreRole">
+		<result column="idd" property="idd"/>
+		<result column="userName" property="userName"/>
+		<result column="fuzz" property="fuzz"/>
+		<result column="loginName" property="loginName"/>
+		<result column="userSex" property="userSex"/>
+		<result column="userStatu" property="userStatu"/>
+		<result column="identityCard" property="identityCard"/>
+		<result column="userAddr" property="userAddr"/>
+		<result column="userPhone" property="userPhone"/> 
+		<result column="userTele" property="userTele"/> 
+		<result column="loginPwd" property="loginPwd"/>
+		<result column="userDept" property="userDept"/>
+		<result column="delFlag" property="delFlag"/>
+		<collection property="roles" ofType="com.vkl.ckts.common.entity.RoleEntity" javaType="java.util.ArrayList" >
+			<result column="id" property="id"/>
+			<result column="roleName" property="roleName"/>
+		</collection>
+	</resultMap>
+	
+	<!-- 用详情 -->
+	<select id="oneUser" resultMap="moreRole">
+		select 
+		    u.id as idd,
+		    u.user_name as userName,
+		    u.fuzz as fuzz,
+		    u.login_name as loginName ,
+		    u.user_sex as userSex,
+		    u.user_statu as userStatu,
+		    u.user_dept as userDept,
+	        u.user_tele as userTele,
+	        u.user_addr as userAddr,
+	        u.identity_card as identityCard,
+	        u.user_phone as userPhone,
+	        u.login_pwd as loginPwd,
+			o.role_name as roleName,
+		    o.id        as id,
+		    u.del_flag  as  delFlag
+		from users u 
+		left join  user_role r on u.id = r.use_id
+		left join role  o on r.role_id = o.id
+		where u.id = #{id}
+	</select>
+	
+	<!-- 添加用户 -->
+	<insert id="addUser" parameterType="com.vkl.ckts.pub.dto.UserAdmin" >
+		<selectKey resultType="String" order="BEFORE" keyProperty="id">
+			select seq_user.nextval as id from dual
+		</selectKey> 		
+		insert into users u(
+			u.id,
+			u.user_name,
+			u.fuzz,
+			u.login_name,
+			u.login_pwd,
+			u.IDENTITY_CARD,
+			u.USER_DEPT,
+			u.USER_TELE,
+			u.USER_ADDR,
+			u.USER_PHONE,
+			u.user_sex,
+			u.user_statu,
+	        u.crter,
+	        u.crt_time,
+	        u.upder,
+	        u.upd_time,
+			u.del_flag,
+			u.SFGLY
+		)values(
+			seq_user.currval,
+			#{userName},
+			#{fuzz},
+			#{loginName},
+			#{loginPwd},
+			#{identityCard},
+			#{userDept},
+			#{userTele},
+			#{userAddr},
+			#{userPhone}, 
+			#{userSex},
+			#{userStatu},
+			#{creater},
+			#{createDate},
+			#{updater},
+			#{updDate},
+			#{delFlag},
+			#{sfgly}
+		)
+		
+	</insert>
+	<!-- 插入用户角色 -->
+	<insert id="addURole" parameterType="java.util.List" useGeneratedKeys="false">
+	insert into 
+	user_role(
+		USE_ID,
+		ROLE_ID
+	) (
+		<foreach collection="list" item="role" index="index" separator="union all">
+			select 
+				#{role.id},
+				#{role.roleId}
+			from dual
+		</foreach>
+	)
+	</insert>
+	<!-- 逻辑删除用户 -->
+	<update id="delUser">
+		      update users set users.del_flag =#{delFlag} where users.id = #{id}
+	</update>
+	
+	<!-- 物理删除用户角色 -->
+	<delete id="delURole">
+		delete user_role r 
+		<where>
+			<if test="id != null and id !=''">
+				and r.use_id=#{id}
+			</if>
+			<if test="roleId != null and roleId !='' ">
+				and r.role_id = #{roleId}
+			</if>
+		</where>
+	</delete>
+	<!-- 修改用户 -->
+	<update id="userUpd">
+		update users u set u.user_name = #{userName}, 
+			u.fuzz = #{fuzz},
+			u.login_name = #{loginName},
+			u.login_pwd = #{loginPwd},
+			u.USER_TELE = #{userTele},
+			u.USER_ADDR = #{userAddr},
+			u.USER_PHONE = #{userPhone},
+			u.user_sex = #{userSex},
+			u.user_statu = #{userStatu},
+	        u.crter = #{creater},
+	        u.crt_time = #{createDate},
+	        u.upder = #{updater},
+	        u.upd_time = #{updDate},
+	        u.IDENTITY_CARD=#{identityCard},
+	        u.del_flag=#{delFlag},
+	        u.USER_DEPT=#{userDept}
+		where u.id = #{id}
+	</update>
+</mapper>

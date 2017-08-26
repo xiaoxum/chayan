@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.vehicleinformation.dao.IVedioRecordDaos">
+	
+	<sql id="column">
+		srln as "srln",
+		VEDIO_URL as "vedioUrl",
+		FW_URL as "fwUrl",
+		INT_URL as "intUrl"
+		
+	</sql>
+	<sql id="columns">
+		a.srln as "srln",
+		a.VEDIO_URL as "vedioUrl",
+		a.FW_URL as "fwUrl",
+		a.INT_URL as "intUrl",
+		a.VEDIO_ANGLE as  "vedioAngle"
+	</sql>
+	<!-- 根据流水号查询 -->
+	<select id="findBySrln" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.VedioRecordDto">
+		select 
+		<include refid="columns"></include> 
+		from VEDIO_RECORD  a
+		where 
+		srln=#{0}
+		and a.RCK_COUNT = #{1}
+	</select>
+		<!-- 根据流水号查询查验信息 -->
+	<select id="findckinfobysrln" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.CkInfoEntityDto">
+		select
+				a.SRLN             as     "srln",
+				a.OPER_TYPE        as     "operType",
+				a.HPHM             as     "hphm",
+				a.ORGAN_CODE       as     "organCode",
+				a.SYXZ             as     "syxz",
+				a.CLSBDH           as     "clsbdh",
+				a.CKER             as     "cker",
+				a.IS_IMPL          as     "isImpl",
+				a.CLLX             as     "cllx",
+				a.RCK_COUNT        as     "rckCount",
+				a.OPER_STATU       as     "operStatu",
+				a.DEVICE_CK_STATU  as     "deviceCkStatu",
+				a.AUDIT_FLAG       as     "auditFlag",
+				a.PDA_START        as     "pdaStartTime",
+				a.PDA_END          as     "pdaEndTime",
+				a.AUDIT_TIME       as     "auditTime",
+				a.UNQUAL_ANNCS     as     "unQualANNCCS",
+				a.CYXBH            as     "cyxbh"
+				,a.PDA_PZ_TIME_S  as  "pdaPzStartTime"
+				,a.PDA_PZ_TIME_E  as  "pdaPzEndTime"
+		from 
+		          CK_INFO a
+		inner join 
+		          CEH_USNR r 
+		        on 
+		          r.SYXZ = a.SYXZ
+		inner join 
+		          CK_CLLX k 
+		       on 
+		          k.CLLX = a.CLLX
+		    where    
+		         a.SRLN=#{0}
+		     and 
+		         a.RCK_COUNT = #{1}
+		
+	</select> 
+	
+	
+		<insert id="insertVideoInfo"  useGeneratedKeys="true" keyProperty="vedioId" >
+		
+		 <selectKey resultType="java.lang.Integer"  keyProperty="vedioId" order="BEFORE">
+             select SEQ_RECORD.NEXTVAL as vedioId FROM dual
+         </selectKey>
+		insert into
+		VEDIO_RECORD(
+		ID,
+		SRLN,
+		VEDIO_URL,
+		START_TIME,
+		END_TIME,
+		FW_URL,
+		INT_URL,
+		DVR_USER ,
+		DVR_PWD ,
+		DVR_CHANNEL ,
+		IS_UNLOAD ,
+		VEDIO_ANGLE ,
+		VEDIO_TYPE ,
+		CLIENT_ACCESS_URL ,
+		SERVER_ACCESS_URL ,
+		CRT_TIME ,
+		DEL_FLAG ,
+		RCK_COUNT ,
+		UPLOAD_NUMS,
+		FILE_BLOCKS,
+		UP_FLAG,
+		VEDIO_PORT
+		)values(
+		#{vedioId},
+		#{srln},
+		#{vedioUrl},
+		#{startTime},
+		#{endTime},
+		#{fwUrl},
+		#{intUrl},
+		#{dvrUser},
+		#{dvrPwd},
+		#{dvrChannel},
+		#{isUnload},
+		#{vedioAngle},
+		#{vedioType},
+		#{clientAccessUrl},
+		#{serverAccessUrl},
+		#{createDate},
+		#{delFlag},
+		#{rdkCount},
+		#{uploadBloks},
+		#{fileBlocks},
+		#{upUload},
+		#{dvrProt}
+		)
+	</insert>
+	
+	
+	   <select id="findVideoInfo" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.VedioRecordDto">
+       select 
+		<include refid="column"></include> 
+		from 
+		      VEDIO_RECORD  
+		where 
+		      srln=#{0}
+          and 
+              RCK_COUNT=#{1}
+          and 
+              VEDIO_ANGLE=#{2}
+   </select>
+   
+<!-- 	
+	
+	<sql id="cklptInfocolumns">
+		a.ORGAN_CODE as "organCode",
+		a.ORGAN_NAME as  "organName",
+		a.ASTS as  "asts",
+		a.ORGAN_TYPE as  "organType",
+		a.ORGAN_ADDR as  "organAddr",
+		a.ORGAN_EMAIL as  "organEmail",
+		a.PRIP_NAME as  "pripName",
+		a.PRIP_PHONE as  "pripPhone",
+		a.CK_CLLXS as  "ckCllxs",
+		a.FILE_TIME as  "fileTime",
+		a.FILER_RG_JOP as  "filerRgJop",
+		a.LOGOFF_TIME as  "logoffTime",
+		a.FILE_STATU as  "fileStatu",
+		a.CK_CENT_LT as  "ckCentLt",
+		a.CK_CENT_LG as  "ckCentLg",
+		a.CK_CENT_R as  "ckCentR",
+		a.FILE_APPLER_JOP as  "fileApplerJop",
+		a.FILE_APPL_DATE as "fileApplDate",
+		a.LOCAL_STATU  as "localStatu",
+		a.AUDIT_FLAG  as "auditFlag",
+		a.OPERTYPES  as "operTypes",
+		a.SYXZS  as "syxzs",
+		a.IS_USER_DZ  as "userDz",
+		a.PARENT_DEPT_ID as "paDeptId"
+		  ,FTP_DIR  as "ftpDir",
+	      FTP_USER  as "ftpUser",
+	      FTP_PWD   as "ftpPwd"
+	</sql>
+	
+	 -->
+	
+	<!-- 根据机构编号地址查找查验区备案信息 -->
+<!-- 	<select id="findChkptInfo" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.ChkptInfoDto">
+	      select  
+	      <include refid="cklptInfocolumns" />
+	      from 
+	      CHKPT_FILE a
+	       where a.ORGAN_CODE=#{0}
+	             and a.AUDIT_FLAG='0'   
+	             and a.DEL_FLAG='0'
+	             
+	</select> -->
+<!-- 	   视频信息添加
+	<insert id="insertVideoInfo"  useGeneratedKeys="true" keyProperty="vedioId" >
+		
+		 <selectKey resultType="java.lang.Integer"  keyProperty="vedioId" order="BEFORE">
+             select SEQ_RECORD.NEXTVAL as vedioId FROM dual
+         </selectKey>
+		insert into
+		VEDIO_RECORD(
+		ID,
+		SRLN,
+		VEDIO_URL,
+		START_TIME,
+		END_TIME,
+		FW_URL,
+		INT_URL,
+		DVR_USER ,
+		DVR_PWD ,
+		DVR_CHANNEL ,
+		IS_UNLOAD ,
+		VEDIO_ANGLE ,
+		VEDIO_TYPE ,
+		CLIENT_ACCESS_URL ,
+		SERVER_ACCESS_URL ,
+		CRT_TIME ,
+		DEL_FLAG ,
+		RCK_COUNT ,
+		UPLOAD_NUMS,
+		FILE_BLOCKS,
+		UP_FLAG,
+		VEDIO_PORT
+		)values(
+		#{vedioId},
+		#{srln},
+		#{vedioUrl},
+		#{startTime},
+		#{endTime},
+		#{fwUrl},
+		#{intUrl},
+		#{dvrUser},
+		#{dvrPwd},
+		#{dvrChannel},
+		#{isUnload},
+		#{vedioAngle},
+		#{vedioType},
+		#{clientAccessUrl},
+		#{serverAccessUrl},
+		#{createDate},
+		#{delFlag},
+		#{rdkCount},
+		#{uploadBloks},
+		#{fileBlocks},
+		#{upUload},
+		#{dvrProt}
+		)
+	</insert>
+   
+   
+   <select id="findVideoInfo" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.CkInfoEntityDto">
+       select 
+		<include refid="column"></include> 
+		from 
+		      VEDIO_RECORD  
+		where 
+		      srln=#{0}
+          and 
+              RCK_COUNT=#{1}
+          and 
+              VEDIO_ANGLE=#{2}
+   </select>
+   
+   <update id="updateVideoInfo">
+         update 
+            VEDIO_RECORD
+         set
+            VEDIO_URL=#{vedioUrl},
+            UPD_TIME=#{updDate}
+          where 
+               srln=#{srln}
+          and 
+              RCK_COUNT=#{rdkCount}
+          and 
+              VEDIO_ANGLE=#{vedioAngle}   
+         
+   
+   
+   </update>
+   
+   
+    <update id="updateVideoStatu">
+	        update 
+	              video_statu
+	        set 
+	              video_start_date=#{videoStartDate},
+	              video_end_date=#{vedioEndDate}
+	        where 
+	              SRLN=#{srln}
+	          and 
+	              rckCount=#{rckCount}
+	          and 
+	               VIDEO_OP_ID=#{videoOptId}
+	 </update>
+	 
+	 
+	 
+	 	  <select id="findCkpzrc" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.PicRecordDto">
+       select 
+             PIC_ID    AS "picId",
+             PIC_TYPE  AS  "picType",
+             PIC_STATU as  "picStatu"
+         from 
+             PIC_RECORD
+         where 
+              SRLN=#{0}
+           and 
+              rck_count=#{1}
+   </select>
+	<select id="findNolzVideo" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.VedioOptionDto">
+         select
+             a.VIDEO_NAME||','||to_char(b.VIDEO_START_DATE,'yyyy-MM-dd hh24:mi:ss')  as "vedioOptionName",
+             a.VIDEO_ID          as  "vedioOptionId"
+         from 
+             VIDEO_OPTION a
+          inner join 
+             VIDEO_STATU  b
+             on 
+               b.VIDEO_OP_ID=A.VIDEO_ID
+             and 
+               SRLN=#{0}
+             and 
+               RCKCOUNT=#{1}
+           WHERE 
+                b.VIDEO_END_DATE is null 
+    </select>
+     <select id="findProjectRecord" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.ProjectRecordDto">
+        select
+            SRLN        AS     "srln",
+            RCK_COUNT   AS     "rckCount",
+            PRO_ID      AS     "proId"
+        from 
+            PROJECT_RECORD  
+        where 
+            SRLN=#{0}
+         and 
+            RCK_COUNT=#{1}
+    </select>
+    
+    更新查验信息
+	<update id="updateCkInfo">
+		update CK_INFO a
+		set a.CKER=#{cker},
+		a.UPD_TIME=#{updDate},
+		a.AUDIT_TIME=#{auditTime},
+		a.AUDIT_FLAG=#{auditFlag}
+		where a.SRLN=#{srln} and a.RCK_COUNT=#{rckCount}
+	</update>
+	
+	
+	  <select id="getConfigParam" resultType="java.lang.String">
+         select 
+          nvl(a.val,'')
+         from 
+         SYS_CONFIG a
+         where a.KEY=#{key}
+      </select> -->
+   
+   
+       <select id="findVideoConfigByBh" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.ChkptNvrConfigDto">
+        select
+           NVR_USER                as   "nvrUser",
+           NVR_IP                  as   "nvrIp",
+           NVR_PWD                 as   "nvrPwd",
+           SERV_PORT               as   "servPort",
+           VIDEO_DOWNLOAD_CHANNEL  as   "videoDownLoadChannel",
+           CHECK_LINE_ID     as   "checkLineId",
+           CHECK_LINE_NAME   as   "checkLineName"
+        from 
+           CHKPT_VIDEO_CONFIG  a 
+        where 
+            a.ORGAN_CODE=#{0}
+          and 
+            a.CHECK_LINE_ID = #{1}
+    </select>
+   
+   
+   
+   
+</mapper>

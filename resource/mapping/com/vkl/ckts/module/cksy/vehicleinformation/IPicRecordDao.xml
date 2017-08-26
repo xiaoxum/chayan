@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.vehicleinformation.dao.IPicRecordDaos">
+	
+	<sql id="column">
+		a.srln as "srln",
+		a.pic_url as "picUrl",
+		a.pic_id as "picId",
+		b.PIC_NAME as "proName",
+		a.PIC_STATU as "picStatu",
+		a.AUDIT_REMAKS as "auditRemaks"
+	</sql>
+
+	<!-- 根据流水号查询 -->
+	<select id="findBySrln" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.PicRecordDto">
+		select 
+		          <include refid="column"></include>
+		from 
+		           PIC_RECORD a 
+		inner join PIC_PROJECT b 
+		on 
+		           a.pic_id=b.id
+		where 
+		           a.srln=#{0}
+		    and 
+		           a.RCK_COUNT=#{1}
+	</select>
+	<!-- 更新照片记录表数据 -->
+	<update id="updInfo">
+		update PIC_RECORD set
+		AUDIT_REMAKS=#{auditRemaks},
+		PIC_STATU=#{picStatu}
+		where srln=#{srln} and PIC_ID=#{picId}
+	
+	</update>
+	
+	
+	
+   <select id="findOperPicPro" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.PicRecordDto">
+	   select
+	       a.PIC_PRO      as  "picId",
+	       d.pic_url      as  "picUrl",
+	       b.PIC_NAME     as  "proName",
+		   d.PIC_STATU    as  "picStatu",
+		   d.AUDIT_REMAKS as  "auditRemaks"
+	   from 
+	              OPER_PIC_PROJECT a
+	   left join 
+	              PIC_RECORD d 
+	          on 
+	              d.PIC_ID=a.PIC_PRO
+	          and 
+	              d.srln=#{3}
+	          and
+	              d.RCK_COUNT=#{4}
+	   inner join PIC_PROJECT b 
+	           on 
+	              a.PIC_PRO=b.id
+	          and 
+	              a.OPER_TYPE=#{0}
+	          and 
+	              a.SYXZ=#{1}
+	          and 
+	              a.CLLX=#{2}
+	</select>
+	
+	<select id="findPicRecordDto" resultType="com.vkl.ckts.cksy.vehicleinformation.entity.PicRecordDto">
+	   	select 
+		          a.srln as "srln",
+				  a.pic_url as "picUrl",
+				  a.pic_id as "picId",
+				  a.PIC_STATU as "picStatu",
+				  a.AUDIT_REMAKS as "auditRemaks"
+		from 
+		           PIC_RECORD a 
+		where 
+		           a.srln=#{0}
+		    and 
+		           a.RCK_COUNT=#{1}
+		    and 
+		           a.pic_id=#{2}
+	
+	
+	</select>
+	
+	
+	<insert id="addPicRecord" >
+		insert into
+		PIC_RECORD(
+			SRLN,
+			PIC_URL,
+			PIC_ID,
+			PIC_STATU,
+			VIEW_IDS,
+			PIC_TIME,
+			DEVICE_ID,
+			CRT_TIME,
+			CRTER,
+			DEL_FLAG,
+			RCK_COUNT,
+		    SFDY 
+		)values(
+			    #{srln},
+				#{picUrl},
+				#{picId},
+				#{picStatu},
+				#{viewIds},
+				#{picTime},
+				#{deviceId},
+				#{createDate},
+				#{creater},
+				#{delFlag},
+				#{rckCount},
+				#{sfdy}
+		)
+	</insert>
+	
+	<!-- 更新照片记录为扑拍-->
+	<update id="updatePicRecord">
+		update 
+		     PIC_RECORD 
+		set
+            PIC_STATU='1'
+		where 
+		    srln=#{0} 
+		and 
+		    RCK_COUNT=#{1}
+		and 
+		    PIC_ID=#{2}
+	</update>
+	
+	
+	<update id="updateCkStatu">
+		   update 
+		      ck_info
+		   set
+		      OPER_STATU  =  '7',
+		      SFDY        =  '0'
+		   where 
+		       srln=#{0}
+		   and 
+		       RCK_COUNT=#{1}
+	
+	</update>
+</mapper>

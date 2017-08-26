@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.vehiclereview.dao.IProjectRecordDao">
+
+	<sql id="coulmn">
+		SRLN as "srln",
+		PRO_ID as "proId",
+		CK_FLAG as "ckFlag"
+	</sql>
+	<!-- 根据流水号查询查验项 -->
+	<select id="findById" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.ProjectRecordDto">
+		select 
+		<include refid="coulmn"></include>
+		from 
+		project_record 
+		where srln=#{srln} and  RCK_COUNT =#{rckCount}
+	</select>
+</mapper>

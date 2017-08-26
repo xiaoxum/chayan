@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.statistic.count.dao.IViewerCountDao">
+
+	<!-- 查询所有查验信息 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.statistic.count.entity.CheckCount">
+		select * from(
+			select a.*,rownum as rowno from(			
+					select c.p_cllx,
+						c.parent_name as parentName,
+						f.organ_name,
+						(case when t.parent_id is null then '变更备案'
+						 when t.parent_id is not null then t.type_name 
+						 end) as typeName,
+						 w.aCount as aCount,
+						 w.cCount as cCount,
+						 v.view_name as viewer,
+						 w.crt_time
+					 from (
+					  select p.aCount,(case when q.cCount is null then 0 when q.cCount is not null then q.cCount end) as cCount,p.views, p.oper_type,p.cllx,p.organ_code,p.crt_time from(
+					     select count(1) as aCount,d.views, d.oper_type,d.cllx,d.organ_code,d.audit_flag,d.crt_time   from(
+					      select (case
+					               when instr(i.cker, ',') > 0 then  
+					                substr(i.cker, 0, instr(i.cker, ',')-1) 
+					               else
+					                i.cker
+					             end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i
+					      union all 
+					      select (case
+					               when instr(i.cker, ',') > 0 then
+					                 substr(i.cker,instr(i.cker, ',') + 1,length(i.cker))
+					               end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i      
+					     )d
+					     where d.views is not null
+					     group by d.views, d.oper_type,d.cllx,d.organ_code,d.audit_flag ,d.crt_time 
+					   )p          
+					   left join 
+					   (
+					     select count(1) as cCount,d.views, d.oper_type,d.cllx,d.organ_code,d.crt_time from(
+					      select (case
+					               when instr(i.cker, ',') > 0 then  
+					                substr(i.cker, 0, instr(i.cker, ',')-1) 
+					               else
+					                i.cker
+					             end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i
+					      union all 
+					      select (case
+					               when instr(i.cker, ',') > 0 then
+					                 substr(i.cker,instr(i.cker, ',') + 1,length(i.cker))
+					               end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i      
+					     )d
+					     where d.views is not null and d.audit_flag ='0'
+					     group by d.views, d.oper_type,d.cllx,d.organ_code ,d.audit_flag ,d.crt_time 
+					   )q
+					   on p.views = q.views
+					)w
+					inner join ck_cllx c on c.cllx = w.cllx
+					left join oper_type t on t.id = w.oper_type
+					inner join chkpt_file f on f.organ_code = w.organ_code					
+					inner join viewer_file v on v.file_id = w.views
+					<if test="t.cllx != null and t.cllx != ''">
+						and c.p_cllx = #{t.cllx}
+					</if>
+					<if test="t.operType != null and t.operType != ''">
+						and 
+					    (INSTR(w.oper_type,#{t.operType}||',')=1
+						OR INSTR(w.oper_type , ','||#{t.operType}||',')>0
+						OR w.oper_type=#{t.operType}
+						OR 
+						length(w.oper_type) = 
+						(CASE 
+							WHEN length(#{t.operType}) = length(w.oper_type) 
+					    	THEN  -1  
+			        		ELSE  length(','||#{t.operType})-1+INSTR(w.oper_type , ','||#{t.operType}) 
+			        		END ))
+					</if>
+					<if test="t.organCode != null and t.organCode != ''">
+						and w.organ_code = #{t.organCode}
+					</if>
+					<if test="t.start != '' and t.start != null">
+						and to_char(w.crt_time,'yyyy-mm-dd')  &gt;= #{t.start}
+					</if>
+					<if test="t.end != '' and t.end != null">
+						and to_char(w.crt_time,'yyyy-mm-dd')  &lt;= #{t.end}
+					</if>
+			)a where rownum &lt;= #{pageNo} * #{pageSize}
+		)b where b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}		
+	</select>
+	
+	<!-- 分页查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select c.p_cllx,
+				c.cllx_name as cllx,
+				f.organ_name,
+				(case when t.parent_id is null then '变更备案'
+				 when t.parent_id is not null then t.type_name 
+				 end) as operType,
+				 w.aCount,
+				 w.cCount,
+				 v.view_name,
+				 w.crt_time  
+			from (
+			  select p.aCount,(case when q.cCount is null then 0 when q.cCount is not null then q.cCount end) as cCount,p.views, p.oper_type,p.cllx,p.organ_code,p.crt_time from(
+			     select count(1) as aCount,d.views, d.oper_type,d.cllx,d.organ_code,d.audit_flag,d.crt_time   from(
+			      select (case
+			               when instr(i.cker, ',') > 0 then  
+			                substr(i.cker, 0, instr(i.cker, ',')-1) 
+			               else
+			                i.cker
+			             end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i
+			      union all 
+			      select (case
+			               when instr(i.cker, ',') > 0 then
+			                 substr(i.cker,instr(i.cker, ',') + 1,length(i.cker))
+			               end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i      
+			     )d
+			     where d.views is not null
+			     group by d.views, d.oper_type,d.cllx,d.organ_code,d.audit_flag ,d.crt_time 
+			   )p          
+			   left join 
+			   (
+			     select count(1) as cCount,d.views, d.oper_type,d.cllx,d.organ_code,d.crt_time from(
+			      select (case
+			               when instr(i.cker, ',') > 0 then  
+			                substr(i.cker, 0, instr(i.cker, ',')-1) 
+			               else
+			                i.cker
+			             end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i
+			      union all 
+			      select (case
+			               when instr(i.cker, ',') > 0 then
+			                 substr(i.cker,instr(i.cker, ',') + 1,length(i.cker))
+			               end) as views, i.oper_type,i.cllx,i.organ_code,i.audit_flag,i.crt_time from ck_info i      
+			     )d
+			     where d.views is not null and d.audit_flag ='0'
+			     group by d.views, d.oper_type,d.cllx,d.organ_code ,d.audit_flag ,d.crt_time 
+			   )q
+			   on p.views = q.views
+			)w
+			inner join ck_cllx c on c.cllx = w.cllx
+			left join oper_type t on t.id = w.oper_type
+			inner join chkpt_file f on f.organ_code = w.organ_code
+			inner join viewer_file v on v.file_id = w.views
+					<if test="cllx != null and cllx != ''">
+						and c.p_cllx = #{cllx}
+					</if>
+					<if test="operType != null and operType != ''">
+						and 
+					    (INSTR(w.oper_type,#{operType}||',')=1
+						OR INSTR(w.oper_type , ','||#{operType}||',')>0
+						OR w.oper_type=#{operType}
+						OR 
+						length(w.oper_type) = 
+						(CASE 
+							WHEN length(#{operType}) = length(w.oper_type) 
+					    	THEN  -1  
+			        		ELSE  length(','||#{operType})-1+INSTR(w.oper_type , ','||#{operType}) 
+			        		END ))
+					</if>
+					<if test="organCode != null and organCode != ''">
+						and w.organ_code = #{organCode}
+					</if>
+					<if test="start != '' and start != null">
+						and to_char(w.crt_time,'yyyy-mm-dd')  &gt;= #{start}
+					</if>
+					<if test="end != '' and end != null">
+						and to_char(w.crt_time,'yyyy-mm-dd')  &lt;= #{end}
+					</if>
+		)
+	</select>
+	
+	<!-- 查询查验员的查验信息总记录数 -->
+	<select id="allCount" resultType="Integer">
+		select count(1) from(
+			select distinct(i.srln),v.view_name
+			from ck_info i
+			left join viewer_file v on i.cker = v.file_id
+			inner join chkpt_file c on c.organ_code = i.organ_code
+			where (instr(v.file_id , #{viewer}||',') =1 or instr(v.file_id,','||#{viewer})=1)
+			<if test="cllx != null and cllx != ''">
+				and i.cllx = #{cllx}
+			</if>
+			<if test="operType != null and operType != ''">
+				<choose>
+					<when test="typeName == '变更备案'">
+						and i.oper_type is null
+					</when>
+					<otherwise>
+						and i.oper_type=#{operType}
+					</otherwise>
+				</choose>
+			</if>
+		)
+	</select>
+	
+	<!-- 查验员查验合格记录数 -->
+	<select id="checkCount" resultType="Integer">
+		select count(1) from(
+			select distinct(i.srln),v.view_name
+			from ck_info i
+				left join viewer_file v on i.cker = v.file_id
+			where (instr(v.file_id , #{viewer}||',') =1 or instr(v.file_id,','||#{viewer})=1)
+				and i.audit_flag = #{auditFlag}
+				and i.cllx = #{cllx}
+				<choose>
+					<when test="operType == '变更备案'">
+						and i.oper_type is null
+					</when>
+					<otherwise>
+						and i.oper_type=#{operType}
+					</otherwise>
+				</choose>
+		)
+	</select>
+	<select id="getVName" resultType="String">
+		select v.view_name from viewer_file v where (instr(v.file_id , #{viewer}||',') =1 or instr(v.file_id,','||#{viewer})=1)
+	</select>
+</mapper>

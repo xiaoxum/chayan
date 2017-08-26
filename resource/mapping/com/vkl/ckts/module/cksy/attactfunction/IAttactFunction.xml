@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.attractfunction.dao.IAttractFunctionDao">
+
+      
+    <select id="findAttactPhoto" resultType="com.vkl.ckts.cksy.attractfunction.entity.AttactPhoto">
+       select
+          TAKE_CHKPT    as    "tackeOrganCode",
+          PHOTO_URL     as    "photoUrl",
+          PHOTO_NAME    as    "photoName",
+          ID            as    "id",
+          PHOTO_CLSBDH  as    "clsbdh",
+          TAKE_DATE     as    "tackeDate"
+       from (
+               select
+			          TAKE_CHKPT   ,
+			          PHOTO_URL    ,
+			          PHOTO_NAME   ,
+			          ID           ,
+			          PHOTO_CLSBDH ,
+			          TAKE_DATE,
+			          rownum        as    rn
+		         from 
+		          		ATTACT_PHOTO
+			          <where>
+			             TAKE_CHKPT  = #{t.tackeOrganCode}
+			             <if test="t.photoName !=null and t.photoName != '' ">
+			                  PHOTO_NAME like '%'||#{t.photoName}||'%'
+			             </if>
+			             <if test="t.startTime!=null and t.startTime!='' ">
+									and to_char(TAKE_DATE,'yyyy-MM-dd') &gt;=#{t.startTime} 
+						 </if>
+						 <if test=" t.endTime!=null and t.endTime!=''">
+									and to_char(TAKE_DATE,'yyyy-MM-dd') &lt;=#{t.endTime}
+					     </if>
+					     <if test=" t.clsbdh!=null and t.clsbdh!=''">
+									and PHOTO_CLSBDH like '%'||#{t.clsbdh}||'%'
+					     </if>
+			          </where> 
+			     order by  TAKE_DATE
+             ) a
+         where 
+               a.rn &lt;=#{pageSize}*#{pageNo}
+            and     
+               a.rn &gt;#{pageSize}*(#{pageNo}-1)
+    </select>
+     
+    <select id="findCount" resultType="java.lang.Integer">
+       select
+          count(1)
+       from (
+               select
+			          TAKE_CHKPT   ,
+			          PHOTO_URL    ,
+			          PHOTO_NAME   ,
+			          ID           ,
+			          PHOTO_CLSBDH ,
+			          TAKE_DATE,
+			          rownum        as    rn
+		         from 
+		          		ATTACT_PHOTO
+			          <where>
+			             TAKE_CHKPT  = #{tackeOrganCode}
+			             <if test="photoName !=null and photoName != '' ">
+			                  PHOTO_NAME like '%'||#{photoName}||'%'
+			             </if>
+			             <if test="startTime!=null and startTime!='' ">
+									and to_char(TAKE_DATE,'yyyy-MM-dd') &gt;=#{startTime} 
+								</if>
+								 <if test=" endTime!=null and endTime!=''">
+									and to_char(TAKE_DATE,'yyyy-MM-dd') &lt;=#{endTime}
+					    </if>
+					    <if test=" clsbdh!=null and clsbdh!=''">
+									and PHOTO_CLSBDH like '%'||#{clsbdh}||'%'
+					     </if>
+			          </where> 
+			     order by  TAKE_DATE
+             ) a
+    </select>
+    
+    
+    
+    <!-- 查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT where id=#{0}
+	</select>
+    
+    
+</mapper>

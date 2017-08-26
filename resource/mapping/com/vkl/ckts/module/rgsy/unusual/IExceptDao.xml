@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.statistic.unusual.dao.IExceptDao">
+	<sql id="exceptInfo">
+		e.EXC_ID AS "excId",
+		e.EXC_TIME AS "excTime",
+		e.CHKPT AS "chkpt",
+		e.CLLX AS "vehType",
+		e.OPER_TYPE AS "operType",
+		e.CARD_NO AS "cardNo",
+		e.CARD_TYPE AS "cardType",
+		e.SRLN AS "srln",
+		e.SYXZ AS "syxz",
+		e.CLSBDH AS "clsbdh",
+		e.CRT_TIME AS "createDate",
+		e.CRTER AS "creater",
+		e.UPD_TIME AS "updDate",
+		e.UPDER AS "updater",
+		e.DEL_FLAG AS "delFlag",
+		e.EXC_LG AS "exclg",
+		e.EXC_LT AS "exclt",
+		e.VIEWER_ID AS "viewerId",
+		e.DEVICE_ID AS "deviceId"
+	</sql>
+	
+	<!-- 查询所有异常信息 -->
+	
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.statistic.unusual.entity.NewExceptInfo">
+		select * from(
+			select a.*,rownum as rowno from(
+				select  distinct  e.EXC_ID AS "excId", 
+						e.CHKPT AS "chkpt", 
+						e.CLLX AS "vehType", 
+						e.OPER_TYPE AS "operType", 
+						e.SYXZ AS "syxz", 
+						e.CRT_TIME AS "createDate",   
+						e.CRTER AS "creater",   
+						e.DEL_FLAG AS "delFlag",
+						p.exe_pro_name AS "exceptName",
+						c.parent_name as "cllxName",
+						v.view_name as "viewName" ,
+						h.organ_name AS "orginName",
+						t.type_name as "operTypeName"
+				from exe_info e
+				inner join exe_pro p on e.exc_item = p.exe_pro_id
+				inner join ck_cllx c on e.cllx = c.cllx
+				inner join viewer_file v on e.viewer_id = v.id
+				inner join chkpt_file h on e.chkpt = h.organ_code
+        		inner join oper_type t on e.oper_type = t.id  
+        		
+				<where>
+					<if test="t.orginName != null and t.orginName != ''">
+						and h.organ_name like '%'||#{t.orginName}||'%'
+					</if>
+					<if test="t.viewName != null and t.viewName != ''">
+						and v.view_name like '%'||#{t.viewName} ||'%'
+					</if>
+					<if test="t.vehType != null and t.vehType != ''">
+						 and c.p_cllx = #{t.vehType}
+					</if>
+					<if test="t.operType != null and t.operType != ''">
+						and e.oper_type = #{t.operType}
+					</if>
+					<if test="t.start != null and t.start != ''">
+						and e.CRT_TIME &gt;= #{t.start}
+					</if>
+					<if test="t.end != null and t.end != ''">
+						and e.CRT_TIME &lt;= #{t.end}
+					</if>
+				</where>
+				order by e.crt_time desc
+			)a
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+		)b
+		<where>
+			b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+		</where>
+		
+	</select>
+	
+	<!-- 查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select  distinct  e.EXC_ID AS "excId", 
+					e.CHKPT AS "chkpt",
+					e.CLLX AS "vehType", 
+					e.OPER_TYPE AS "operType", 
+					e.SYXZ AS "syxz", 
+					e.CRT_TIME AS "createDate",   
+					e.CRTER AS "creater",   
+					e.DEL_FLAG AS "delFlag",
+					p.exe_pro_name AS "exceptName",
+					c.parent_name as "cllxName",
+					v.view_name as "viewName" ,
+					h.organ_name AS "orginName"
+		from exe_info e
+		inner join exe_pro p on e.exc_item = p.exe_pro_id
+		inner join ck_cllx c on e.cllx = c.cllx 
+		inner join viewer_file v on e.viewer_id = v.id
+		inner join chkpt_file h on e.chkpt = h.organ_code
+		<where>
+					<if test="orginName != null and orginName != ''">
+						and h.organ_name like '%'||#{orginName}||'%'
+					</if>
+					<if test="viewName != null and viewName != ''">
+						and v.view_name like '%'||#{viewName} ||'%'
+					</if>
+					<if test="vehType != null and vehType != ''">
+						and c.p_cllx = #{vehType}
+					</if>
+					<if test="operType != null and operType != ''">
+						and e.oper_type = #{operType}
+					</if>
+					<if test="start != null and start != ''">
+						and e.CRT_TIME &gt;= #{start}
+					</if>
+					<if test="end != null and end != ''">
+						and e.CRT_TIME &lt;= #{end}
+					</if>
+				</where>
+		)
+	</select>
+	<!-- 查看异常信息详情 -->
+	
+	<select id="detail" resultType="com.vkl.ckts.rgsy.statistic.unusual.entity.NewExceptInfo">
+		select  distinct  e.EXC_ID AS "excId",
+				e.SRLN AS "srln", 
+				e.CHKPT AS "chkpt", 
+				e.CLLX AS "vehType", 
+				e.OPER_TYPE AS "operType", 
+				e.SYXZ AS "syxz", 
+				e.CRT_TIME AS "createDate",   
+				e.CRTER AS "creater",   
+				e.DEL_FLAG AS "delFlag",
+				p.exe_pro_name AS "exceptName", 
+				c.parent_name as "cllxName", 
+				v.view_name as "viewName", 
+				h.organ_name AS "orginName", 
+				o.type_name As "operTypeName"
+		from exe_info e
+		inner join exe_pro p on e.exc_item = p.exe_pro_id
+		inner join ck_cllx c on e.cllx =  c.cllx
+		inner join viewer_file v on e.viewer_id = v.id
+		inner join chkpt_file h on e.chkpt = h.organ_code
+   		inner join oper_type o on e.oper_type = o.id    
+   		<where>
+   		e.EXC_ID = #{excId}
+   		</where>
+	</select>
+	
+	<!-- 根据异常信息修改查验员状态 -->
+	<update id="updViewerStatu" parameterType="com.vkl.ckts.common.entity.ViewerFileEntity">
+		update viewer_file v set v.view_statu = #{viewStatu}, v.upder = #{updater}, v.upd_time = #{updDate}
+		<where>
+			v.id=${id}
+		</where>
+	</update>
+	
+	<!-- 获得查验所有照片 -->
+	<select id="allPic" resultType="com.vkl.ckts.rgsy.statistic.unusual.entity.PicRecord">
+		select p.srln As "srln", p.pic_url AS "picUrl", c.pic_name AS "picName", p.pic_id as picId
+		from pic_record p
+		inner join pic_project c 
+		on p.pic_id = c.id where p.srln = #{srln}
+	</select>
+	<select id="allVedio" resultType="com.vkl.ckts.common.entity.VedioRecordEntity">
+		select distinct r.id as id, r.vedio_url as vedioUrl,r.srln as srln,r.vedio_type as vedioType from  vedio_record r
+  		where r.srln = #{srln}
+		
+	</select>
+</mapper>

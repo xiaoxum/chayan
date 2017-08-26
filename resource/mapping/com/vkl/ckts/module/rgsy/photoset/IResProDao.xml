@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.photosetting.dao.IResProDao">
+	
+	<!-- 查询所有高拍项 -->
+	<select id="allResPro" resultType="com.vkl.ckts.common.entity.ResProEntity">
+		select p.res_id as resId,p.res_name as resName from res_pro p
+	</select>
+
+	<!-- 查询所有高拍项设置 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.system.photosetting.entity.OperRes">
+		select operType,operName,resName from(
+			select a.operType,a.operName,a.resName from(
+			      select 
+			      r.id as operType, 
+			      r.type_name as operName,
+			      (select wm_concat(o.res_name) from oper_res y 
+			      inner join res_pro o on y.res_id=o.res_id 
+			      where y.operatype=r.ID) as resName			        
+			      from oper_type r )a
+			<where>
+			      a.resName is not null
+				<if test="t.operType != null and t.operType !=''">
+					and a.operType = #{t.operType}
+				</if>
+			</where>
+			 	and rownum &lt;= #{pageNo} * #{pageSize}
+		) where rownum &gt;= (#{pageNo} -1) * #{pageSize}
+	</select>
+	
+	<!-- 查询设置总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select a.operType,a.operName,a.resName from(
+			      select 
+			      r.id as operType, 
+			      r.type_name as operName,
+			      (select wm_concat(o.res_name) from oper_res y 
+			      inner join res_pro o on y.res_id=o.res_id 
+			      where y.operatype=r.ID) as resName			        
+			      from oper_type r )a
+			<where>
+			     a.resName is not null
+				<if test="operType != null and operType !=''">
+					and a.operType = #{operType}
+				</if>
+			</where>
+		)
+	</select>
+	
+	<!-- 插入高拍项设置 -->
+	<insert id="insertData">
+		insert into oper_res(
+			res_id ,
+			operatype
+		)values(
+			#{resId},
+			#{operType}
+		)
+	</insert>
+	
+	<!-- 删除高拍项设置 -->
+	<delete id="deleteData">
+		delete oper_res where r.operatype = #{operType}
+	</delete>
+	<!-- 查询修改项 -->
+	<select id="existSet" resultType="com.vkl.ckts.rgsy.system.photosetting.entity.OperRes">
+		select r.res_id as resId,
+			r.operatype as operType, 
+			t.type_name as operName,
+			p.res_name  as resName
+			from oper_res r 
+			inner join oper_type t on t.id = r.operatype
+			inner join res_pro p on p.res_id = r.res_id 
+			where r.operatype = #{operType}
+	</select>
+</mapper>

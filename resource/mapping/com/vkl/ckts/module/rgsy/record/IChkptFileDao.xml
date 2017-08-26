@@ -1,0 +1,261 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IChkptFileDao">
+	<sql id = "ChkptFileColumns">
+		ORGAN_CODE as "organCode",
+		ORGAN_NAME as "organName",
+		ASTS as "asts",
+		ORGAN_TYPE as "organType",
+		ORGAN_ADDR as "organAddr",
+		ORGAN_EMAIL as "organEmail",
+		PRIP_NAME as "pripName",
+		PRIP_PHONE as "pripPhone",
+		CK_CLLXS as "ckCllxs",
+		FILE_TIME as "fileTime",
+		FILER_RG_JOP as "filerRgJop",
+		LOGOFF_TIME as "logoffTime",
+		FILE_STATU as "fileStatu",
+		CK_CENT_LG as "ckCentLg",
+		CK_CENT_LT as "ckCentLt",
+		CK_CENT_R as "ckCentR",
+		FILE_APPLER_JOP as "fileApplerJop",
+		FILE_APPL_DATE as "fileApplDate",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		LOCAL_STATU as "localStatu",
+		IS_USER_DZ as "userDz",
+		SYXZS as "syxzs",
+		OPERTYPES as "operTypes",
+		AUDIT_FLAG as "auditFlag",
+		PARENT_DEPT_NAME as "parentDeptName",
+		PARENT_DEPT_ID as "parentDeptId",
+		ID as "id",
+		IS_AUTO_AUDIT   as  "isAutoAudit",
+	    VIDEO_IP        as   "videoIp",
+	    VIDEO_PORT      as   "videoPort"
+	</sql>
+		<!-- 添加部门 -->
+	<insert id="addDept">
+		insert into DEPT(
+			ID ,
+			DEPT_TYPE ,
+			DEPT_NAME ,
+			PARENT_ID ,
+			DEPT_INTR ,
+			DEPT_ADDR ,
+			DEPT_PHONE ,
+			DEPT_EMAIL ,
+			DEPT_URL ,
+			ASTS ,
+			CRT_TIME ,
+			CRTER ,
+			UPD_TIME ,
+			UPDER ,
+			DEL_FLAG ,
+			IS_FILE_DEPT ,
+			FILE_ID 
+		)values(
+			seq_dept.nextval,
+			#{deptType},
+			#{deptName},
+			#{parentId},
+			#{deptIntr},
+			#{deptAddr},
+			#{deptPhone},
+			#{deptEmail},
+			#{deptUrl},
+			#{asts},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{isFileDept},
+			#{fileId}
+		)
+	</insert>
+	<!-- 添加查验区备案申请 -->
+	<insert id="addChkptFile">
+		insert into CHKPT_FILE(		
+			ORGAN_CODE,
+			ORGAN_NAME,
+			ASTS,
+			ORGAN_TYPE,
+			ORGAN_ADDR,
+			ORGAN_EMAIL,
+			PRIP_NAME,
+			PRIP_PHONE,
+			CK_CLLXS,
+			FILE_TIME,
+			FILER_RG_JOP,
+			LOGOFF_TIME,
+			FILE_STATU,
+			CK_CENT_LG,
+			CK_CENT_LT,
+			CK_CENT_R,
+			FILE_APPLER_JOP,
+			FILE_APPL_DATE,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			LOCAL_STATU,
+			IS_USER_DZ,
+			SYXZS,
+			OPERTYPES,
+			AUDIT_FLAG,
+			PARENT_DEPT_NAME,
+			PARENT_DEPT_ID,
+			ID,
+			IS_AUTO_AUDIT,
+			VIDEO_IP,
+			VIDEO_PORT
+			) 
+		values(
+			#{organCode},
+			#{organName},
+			#{asts},
+			#{organType},
+			#{organAddr},
+			#{organEmail},
+			#{pripName},
+			#{pripPhone},
+			#{ckCllxs},
+			#{fileTime},
+			#{filerRgJop},
+			#{logoffTime},
+			#{fileStatu},
+			#{ckCentLg},
+			#{ckCentLt},
+			#{ckCentR},
+			#{fileApplerJop},
+			#{fileApplDate},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{localStatu},
+			#{userDz},
+			#{syxzs},
+			#{operTypes},
+			#{auditFlag},
+			#{parentDeptName},
+			#{parentDeptId},
+			seq_record.nextval,
+			#{isAutoAudit},
+			#{videoIp},
+			#{videoPort}		
+		)
+	</insert>
+	
+	<!-- 分页查询查验区备案信息 -->
+	<select id = "pageChkptFile" resultType = "com.vkl.ckts.rgsy.record.entity.ChkptFileDto">
+		select <include refid="ChkptFileColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from CHKPT_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.organCode != null and t.organCode != ''">
+						and ORGAN_CODE like '%'||#{t.organCode}||'%'
+					</if>
+					<if test = "t.organName != null and t.organName != ''">
+						and ORGAN_NAME like '%'||#{t.organName}||'%'
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+			
+	</select>
+	
+	<!-- 查询备案通过的查验区列表 -->
+	<select id="findChkptList" resultType = "com.vkl.ckts.rgsy.record.entity.ChkptFileDto">
+		select ORGAN_CODE as "organCode" ,
+			   ORGAN_NAME as "organName" ,
+			   PARENT_DEPT_NAME as "parentDeptName" ,
+			   PARENT_DEPT_ID as "parentDeptId"
+			   from CHKPT_FILE
+			<where>
+				DEL_FLAG = #{DEL_FLAG_NORMAL} and AUDIT_FLAG = #{AUDIT_FLAG_NORMAL}
+				<if test="parentDeptId !=null and parentDeptId !=''">
+					and PARENT_DEPT_ID = #{parentDeptId}
+				</if>
+				<if test="organCode !=null and organCode !=''">
+					and ORGAN_CODE = #{organCode}
+				</if>
+			order by ORGAN_CODE desc
+			</where> 
+	
+	</select>
+		
+	<!-- 查询查验区备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.rgsy.record.entity.ChkptFileDto" resultType="Integer">
+		select count(1) from CHKPT_FILE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="organCode != null and organCode != ''">
+				and ORGAN_CODE like '%'||#{organCode}||'%'
+			</if>
+			<if test="organName != null and organName != ''">
+				and ORGAN_NAME like '%'||#{organName}||'%'
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据查验区编号逻辑删除备案信息 -->
+	<update id = "deleteChkptFileById" parameterType = "com.vkl.ckts.rgsy.record.entity.ChkptFileDto">
+		update CHKPT_FILE 
+		set DEL_FLAG = #{DEL_FLAG_DELETE} 
+		where ORGAN_CODE = #{organCode}
+	</update>
+	
+	<!-- 根据查验区编号查找备案信息-->
+	<select id = "findChkptFileById" resultType = "com.vkl.ckts.rgsy.record.entity.ChkptFileDto">
+		select <include refid = "ChkptFileColumns"></include> from CHKPT_FILE 
+		where ORGAN_CODE = #{organCode}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id = "updateChkptFile">
+		update CHKPT_FILE 
+		set	ORGAN_NAME = #{organName},
+			ASTS = #{asts},
+			ORGAN_TYPE = #{organType},
+			ORGAN_ADDR = #{organAddr},
+			ORGAN_EMAIL = #{organEmail},
+			PRIP_NAME = #{pripName},
+			PRIP_PHONE = #{pripPhone},
+			CK_CLLXS = #{ckCllxs},
+			FILE_TIME = #{fileTime},
+			FILER_RG_JOP = #{filerRgJop},
+			LOGOFF_TIME = #{logoffTime},
+			FILE_STATU = #{fileStatu},
+			CK_CENT_LG = #{ckCentLg},
+			CK_CENT_LT = #{ckCentLt},
+			CK_CENT_R = #{ckCentR},
+			FILE_APPLER_JOP = #{fileApplerJop},
+			FILE_APPL_DATE = #{fileApplDate},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			LOCAL_STATU = #{localStatu},
+			IS_USER_DZ = #{userDz},
+			SYXZS = #{syxzs},
+			OPERTYPES = #{operTypes},
+			AUDIT_FLAG = #{auditFlag},
+			PARENT_DEPT_NAME = #{parentDeptName},
+			PARENT_DEPT_ID = #{parentDeptId},
+			IS_AUTO_AUDIT=#{isAutoAudit},
+			VIDEO_IP    =  #{videoIp},
+			VIDEO_PORT  =  #{videoPort} 
+		where ORGAN_CODE = #{organCode}
+	
+	</update>
+</mapper>

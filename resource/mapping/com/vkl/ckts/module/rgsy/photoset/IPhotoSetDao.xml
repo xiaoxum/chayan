@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.photosetting.dao.IPhotoSetDao">
+	<sql id="operPhoto">
+		o.OPER_TYPE AS  "operType",
+		o.SYXZ AS  "syxz",
+		o.CLLX AS "cllx",
+		o.PIC_PRO AS "picPro",
+		o.CRT_TIME AS "createDate",
+		o.CRTER AS  "creater",
+		o.UPD_TIME AS "updDate",
+		o.UPDER AS  "updater",
+		o.DEL_FLAG AS "delFlag",
+		o.PRINT_NUM AS "printNum"
+	</sql>
+	<sql id="picPro">
+		p.ID AS "id", 
+		p.PIC_NAME AS "picName",
+		p.HELP_INTR AS "helpIntr",
+		p.IS_MUST AS "isMust"
+	</sql>
+	<resultMap type="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject" id="operPicProject">
+		<!-- <result column="operType" property="operType"/>
+		<result column="syxz" property="syxz"/> -->
+		<result column="cllx" property="cllx"/>
+		<collection property="ppe" ofType="com.vkl.ckts.common.entity.PicProjectEntity" javaType="java.util.ArrayList">
+			<id column="picPro" property="id" />
+			<result column="picName" property="picName"/>
+			<result column="isMust" property="isMust"/>
+			<result column="printNum" property="printNum"/>
+		</collection>
+	</resultMap>
+	
+
+	<!-- 查询所有拍照项设置 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject">
+		select * from(
+			select a.*,rownum as rowno from(
+				 select  distinct 
+				            p.OPER_TYPE AS  "operType",
+							p.SYXZ AS  "syxz",
+							p.CLLX AS "cllx",
+							t.type_name AS "typeName",
+							u.parent_name AS "syxzName",
+							c.parent_name AS "parentName" from oper_pic_project p
+		        inner join oper_type t on t.id = p.oper_type
+		        inner join ceh_usnr u on u.parent_id = p.syxz
+		        inner join ck_cllx c on c.p_cllx = p.cllx
+				<where>
+					<if test="t.operType !=null and t.operType != ''">
+						and p.OPER_TYPE = #{t.operType}
+					</if>
+					<if test="t.cllx !=null and t.cllx != ''">
+						and p.CLLX = #{t.cllx}
+					</if> 
+				</where>
+			)a 
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+		)b
+		<where>
+			b.rowno &gt; (#{pageNo} - 1) * #{pageSize}
+		</where>		
+	</select>
+	
+		<!-- 查询所有拍照项设置 -->
+	<select id="findAll1" resultType="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject">
+		select * from(
+			select a.*,rownum as rowno from(
+				 select  distinct 
+							p.CLLX AS "cllx",
+							c.parent_name AS "parentName" 
+			    from 
+			               oper_pic_project p
+		        inner join 
+		                   ck_cllx c on c.p_cllx = p.cllx
+				<where>
+					<if test="t.cllx !=null and t.cllx != ''">
+						and p.CLLX = #{t.cllx}
+					</if> 
+				</where>
+			)a 
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+		)b
+		<where>
+			b.rowno &gt; (#{pageNo} - 1) * #{pageSize}
+		</where>		
+	</select>
+	
+	
+		<!-- 查询所有拍照项设置总记录数 -->
+	<select id="findCount1" resultType="Integer">
+		select count(1) from(
+			select  distinct 
+			                p.CLLX        AS "cllx",
+							c.parent_name AS "parentName" 
+					  from 
+					        oper_pic_project p
+		    
+		        inner join
+		                    ck_cllx c 
+		                on 
+		                    c.p_cllx = p.cllx
+					<where>
+						
+						<if test="cllx !=null and cllx != ''">
+							and p.CLLX = #{cllx}
+						</if> 
+					</where>
+		)
+	</select>
+	
+	<!-- 查询所有拍照项设置总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from(
+			select  distinct p.OPER_TYPE AS  "operType",
+							p.SYXZ AS  "syxz",
+							p.CLLX AS "cllx",
+							t.type_name AS "typeName",
+							u.parent_name AS "syxzName",
+							c.parent_name AS "parentName" from oper_pic_project p
+		        inner join oper_type t on t.id = p.oper_type
+		        inner join ceh_usnr u on u.parent_id = p.syxz
+		        inner join ck_cllx c on c.p_cllx = p.cllx
+					<where>
+						<if test="operType !=null and operType != ''">
+							and p.OPER_TYPE = #{operType}
+						</if>
+						<if test="cllx !=null and cllx != ''">
+							and p.CLLX = #{cllx}
+						</if> 
+					</where>
+		)
+	</select>
+	
+	
+	<!-- 查询所有拍照项 -->
+	<select id="allPicPro" resultType="com.vkl.ckts.common.entity.PicProjectEntity">
+		select <include refid="picPro"/> from pic_project p
+	</select>
+	<insert id="insertData" parameterType="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject">
+		insert into oper_pic_project(
+			OPER_TYPE,
+			SYXZ,
+			CLLX,
+			PIC_PRO,
+			CRT_TIME,
+			CRTER,
+			DEL_FLAG,
+			PRINT_NUM
+		)values(
+			#{operType},
+			#{syxz},
+			#{cllx},
+			#{picPro},
+			#{createDate},
+			#{creater},
+			#{delFlag},
+			NVL(#{printNum}, 0)
+		)	
+	</insert>
+	<select id="oneOperPic1" resultMap="operPicProject">
+		select 
+		<!-- distinct(o.CLLX) -->
+		<!-- <include refid="operPhoto"/>, -->
+	
+		o.CLLX AS "cllx",
+		o.PIC_PRO AS "picPro",
+		o.PRINT_NUM AS "printNum",
+		<include refid="picPro"/>
+		from oper_pic_project o  
+		left join pic_project p on o.pic_pro = p.id 
+		where <!-- o.oper_type = #{operType} and o.syxz = #{syxz} and  -->o.cllx = #{cllx}
+		<if test="picPro != null and picPro !=''">
+			and o.PIC_PRO = #{picPro}
+		</if>
+	</select>
+	<resultMap type="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject" id="operPicProject1">
+		<result column="operType" property="operType"/>
+		<result column="syxz" property="syxz"/>
+		<result column="cllx" property="cllx"/>
+		<collection property="ppe" ofType="com.vkl.ckts.common.entity.PicProjectEntity" javaType="java.util.ArrayList">
+			<id column="picPro" property="id" />
+			<result column="picName" property="picName"/>
+			<result column="isMust" property="isMust"/>
+			<result column="printNum" property="printNum"/>
+		</collection>
+	</resultMap>
+	<select id="oneOperPic" resultMap="operPicProject1">
+		select 
+		distinct
+		o.OPER_TYPE AS  "operType",
+		o.SYXZ AS  "syxz",
+		o.CLLX AS "cllx",
+		o.PIC_PRO AS "picPro",
+		o.PRINT_NUM AS "printNum",
+		<include refid="picPro"/>
+		from oper_pic_project o  
+		left join pic_project p on o.pic_pro = p.id 
+		where o.oper_type = #{operType} and o.syxz = #{syxz} and o.cllx = #{cllx}
+		<if test="picPro != null and picPro !=''">
+			and o.PIC_PRO = #{picPro}
+		</if>
+	</select>
+	<update id="updateData" parameterType="com.vkl.ckts.rgsy.system.photosetting.entity.OperPicProject">
+		update oper_pic_project o set
+			OPER_TYPE = #{operType},
+			SYXZ = #{syxz},
+			CLLX = #{cllx},
+			PIC_PRO = #{picPro},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			PRINT_NUM = NVL(#{printNum}, 0)
+			<where>
+			 o.oper_type = #{operType} and o.syxz = #{syxz} and o.cllx = #{cllx} and o.pic_pro = #{picPro} 
+			</where>
+	</update>
+	<delete id="deleteData">
+		delete oper_pic_project o  where o.oper_type = #{operType} and o.syxz = #{syxz} and o.cllx = #{cllx}
+		<if test="picPro != null and picPro != ''">
+		 and o.pic_pro = #{picPro} 
+		</if>
+	</delete>
+	
+	<delete id="deleteData1">
+		delete oper_pic_project o  where o.cllx = #{cllx}
+	</delete>
+</mapper>

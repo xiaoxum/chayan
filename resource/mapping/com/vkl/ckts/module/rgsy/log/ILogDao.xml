@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.statistic.log.dao.ILogDao">
+	<sql id="logColumn">
+		l.ID AS "id",
+		l.OPER_TIME AS "operTime",
+		l.OPER_INTR AS "operIntr",
+		l.OPERATION AS "operation",
+		l.IP AS "ip",
+		l.OPERER AS "operer",
+		l.CRT_TIME AS "createDate",
+		l.CRTER AS "creater",
+		l.UPD_TIME AS "updDate",
+		l.UPDER AS "updater",
+		l.DEL_FLAG AS "delFlag",
+		l.MK_NAME AS "mkName"
+	</sql>
+	
+	<!-- 插入日志信息 -->
+	<insert id="insertLog" parameterType="com.vkl.ckts.common.entity.OperLogEntity">
+		insert into oper_log (
+			ID,
+			OPER_TIME,
+			OPERATION,
+			oper_intr,
+			IP,
+			OPERER,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			MK_NAME
+		) values(
+			SEQ_BLACK.nextval,
+			#{operTime},
+			#{operation},
+			#{operIntr},
+			#{ip},
+			#{operer},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{mkName}
+		)
+	</insert>
+	
+	<!-- 查询所有日志信息 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.statistic.log.entity.OperaDaily">
+		select * from(
+     		select a.*,rownum as rowno from (
+        		select l.*, u.LOGIN_NAME AS "operName",u.user_name as "userName"
+        		from oper_log l
+        		inner join users u  on l.crter = u.id
+				<where>
+					<if test="t.operName != null and t.operName !=''">
+						and u.LOGIN_NAME like '%'||#{t.operName}||'%'
+					</if>
+					<if test="t.end != null and t.end != ''">
+						and l.OPER_TIME &lt; #{t.end}
+					</if>
+					<if test="t.start != null and t.start != ''">
+						and l.OPER_TIME &gt; #{t.start}
+					</if>
+				</where>
+			   	order by l.OPER_TIME  desc 
+			)a 
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+		)b 
+		<where>
+			b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+		</where>
+	</select>
+	
+	<!-- 查询总记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from (
+			select l.*, u.LOGIN_NAME AS "operName",u.user_name as "userName"
+        		from oper_log l
+        		inner join users u  on l.crter = u.id
+				<where>
+					<if test="id != null and id !=''">
+						and u.LOGIN_NAME = #{operName}
+					</if>
+					<if test="end != null and end != ''">
+						and l.OPER_TIME &lt; #{end}
+					</if>
+					<if test="start != null and start != ''">
+						and l.OPER_TIME &gt; #{start}
+					</if>
+				</where>
+		)
+	</select>
+</mapper>

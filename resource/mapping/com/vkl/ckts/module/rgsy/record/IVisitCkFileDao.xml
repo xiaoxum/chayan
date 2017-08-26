@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IVisitCkFileDao">
+	<sql id = "visitCkFileColumns">
+		FILE_ID as "fileId",
+		SER_FILE_NAME as "serFileName",
+		ADMIN_INTR_NAME as "adminIntrName",
+		CK_FILE_ID as "ckFileId",
+		CK_CLLXS as "ckCllxs",
+		CK_DEPT_NAME as "ckDeptName",
+		USNR as "usnr",
+		CK_DEPT_ID as "ckDeptId",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		SER_TYPE as "serType",
+		PER_INDEDIFY as "perIdentity",
+		PER_NAME as "perName",
+		PER_PHONE as "perPhone",
+		COMP_ADDR as "compAdd",
+		COMP_TELE as "compTele",
+		COMP_LEGAL as "compLegal",
+		COMP_LISCEN as "compliscen",
+		COMP_LEGAL_IDENDIFY as "compLegalIdendify",
+		AUDIT_TIME as "auditTime",
+		AUDIT_FLAG as "auditFlag",
+		ID as "id",
+		LOGOFF_TIME as "logoffTime",
+		FILE_TIME as "fileTime",
+		FILER_RG_JOP as "filerRgJop",
+		CK_APPLER_JOP as "fileApplerJop",
+		FILE_STATU as "fileStatu"
+	</sql>
+
+	<!--添加上门查验备案申请  -->
+	<insert id="addVisitCkFile">
+		insert into VISIT_CK_FILE(
+			FILE_ID,
+			SER_FILE_NAME,
+			ADMIN_INTR_NAME,
+			CK_FILE_ID,
+			CK_CLLXS,
+			CK_DEPT_NAME,
+			USNR,
+			CK_DEPT_ID,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			SER_TYPE,
+			PER_INDEDIFY,
+			PER_NAME,
+			PER_PHONE,
+			COMP_ADDR,
+			COMP_TELE,
+			COMP_LEGAL,
+			COMP_LISCEN,
+			COMP_LEGAL_IDENDIFY,
+			AUDIT_TIME,
+			AUDIT_FLAG,
+			ID,
+			LOGOFF_TIME,
+			FILE_TIME,
+			FILER_RG_JOP,
+			CK_APPLER_JOP,
+			FILE_STATU
+		) values(
+			#{fileId},
+			#{serFileName},
+			#{adminIntrName},
+			#{ckFileId},
+			#{ckCllxs},
+			#{ckDeptName},
+			#{usnr},
+			#{ckDeptId},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{serType},
+			#{perIdentity},
+			#{perName},
+			#{perPhone},
+			#{compAdd},
+			#{compTele},
+			#{compLegal},
+			#{compliscen},
+			#{compLegalIdendify},
+			#{auditTime},
+			#{auditFlag},
+			seq_record.nextval,
+			#{logoffTime},
+			#{fileTime},
+			#{filerRgJop},
+			#{fileApplerJop},
+			#{fileStatu}
+		)
+	</insert>
+	
+	<!-- 分页查询上门查验备案信息 -->
+	<select id="pageVisitCkFile" resultType="com.vkl.ckts.common.entity.VisitCkFileEntity">
+		select <include refid="visitCkFileColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from VISIT_CK_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.ckDeptId != null and t.ckDeptId != ''">
+						and CK_DEPT_ID = #{t.ckDeptId}
+					</if>
+					<if test = "t.serFileName != null and t.serFileName != ''">
+						and SER_FILE_NAME like '%'||#{t.serFileName}||'%'
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询上门查验备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.VisitCkFileEntity" resultType="Integer">
+		select count(1) from VISIT_CK_FILE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+				<if test = "ckDeptId != null and ckDeptId != ''">
+					and CK_DEPT_ID = #{ckDeptId}
+				</if>
+				<if test = "serFileName != null and serFileName != ''">
+					and SER_FILE_NAME like '%'||#{serFileName}||'%'
+				</if>			
+		</where>
+	</select>
+	
+	<!-- 根据上门查验编号逻辑删除备案信息 -->
+	<select id="deleteVisitCkFileById" parameterType="com.vkl.ckts.common.entity.VisitCkFileEntity">
+		update VISIT_CK_FILE 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</select>
+	
+	<!-- 根据上门查验编号查找备案信息 -->
+	<select id="findVisitCkFileById" resultType="com.vkl.ckts.common.entity.VisitCkFileEntity">
+		select <include refid = "visitCkFileColumns"></include> from VISIT_CK_FILE 
+			where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updateVisitCkFile" parameterType="com.vkl.ckts.common.entity.VisitCkFileEntity">
+		update VISIT_CK_FILE
+		set FILE_ID = #{fileId},
+			SER_FILE_NAME = #{serFileName},
+			ADMIN_INTR_NAME = #{adminIntrName},
+			CK_FILE_ID = #{ckFileId},
+			CK_CLLXS = #{ckCllxs},
+			CK_DEPT_NAME = #{ckDeptName},
+			USNR = #{usnr},
+			CK_DEPT_ID = #{ckDeptId},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			SER_TYPE = #{serType},
+			PER_INDEDIFY = #{perIdentity},
+			PER_NAME = #{perName},
+			PER_PHONE = #{perPhone},
+			COMP_ADDR = #{compAdd},
+			COMP_TELE = #{compTele},
+			COMP_LEGAL = #{compLegal},
+			COMP_LISCEN = #{compliscen},
+			COMP_LEGAL_IDENDIFY = #{compLegalIdendify},
+			AUDIT_TIME = #{auditTime},
+			AUDIT_FLAG = #{auditFlag},
+			LOGOFF_TIME = #{logoffTime},
+			FILE_TIME = #{fileTime},
+			FILER_RG_JOP = #{filerRgJop},
+			CK_APPLER_JOP = #{fileApplerJop},
+			FILE_STATU = #{fileStatu}
+		where ID = #{id}
+	</update>
+	
+</mapper>

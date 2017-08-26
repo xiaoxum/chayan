@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.statistic.count.dao.ICheckCountDao">
+	<sql id="checkColum">
+		i.SRLN AS "srln",
+		i.ORGAN_CODE AS "organCode",
+		i.AUDIT_FLAG AS "auditFlag", 
+		i.oper_type as "operType",
+		i.CLLX AS "cllx"
+	</sql>
+	
+	<!-- 查询所有查验信息 -->
+	<select id="findAll" resultType="com.vkl.ckts.rgsy.statistic.count.entity.CheckCount">
+		  select * from(		 
+		      select a.*,rownum as rowno from(	      
+			      select z.dfe as aCount,
+						  (case when z.counts is null then 0 when z.counts is not null then z.counts end)as cCount,
+						   c.parent_name as parentName,
+						   f.organ_name as organName,
+						   (case when t.type_name is null then '变更备案' when t.type_name is not null then t.type_name end )as typeName 
+						from(
+						  select a.dfe,s.counts,a.organ_code,a.oper_type,a.cllx,a.crt_time
+						    from (select count(*) as dfe, e.organ_code,e.oper_type,e.cllx,e.crt_time
+						            from ck_info e
+						           group by e.organ_code,e.oper_type,e.cllx,e.crt_time) a
+						    left join (select count(*) as counts, b.organ_code,b.oper_type,b.cllx,b.crt_time
+						                 from ck_info b
+						                 where  b.audit_flag = '0'
+						                group by b.organ_code,b.oper_type,b.cllx,b.crt_time
+						              ) s
+						     on s.organ_code=a.organ_code where a.organ_code is not null
+						)z
+						inner join ck_cllx c on c.cllx = z.cllx
+						inner join chkpt_file f on f.organ_code = z.organ_code
+						left join oper_type t on t.id = z.oper_type
+				 		<where>
+						<if test="t.organCode != null and t.organCode != ''">
+							and f.organ_code = #{t.organCode}
+						</if>
+						<if test="t.cllx != null and t.cllx != ''">
+							and c.p_cllx = #{t.cllx}
+						</if>
+						<if test="t.end != null and t.end != ''">
+							and to_char(z.crt_time, 'yyyy-mm-dd') &lt;= #{t.end}
+						</if>
+						<if test="t.start != null and t.start != ''">
+							and to_char(z.crt_time, 'yyyy-mm-dd') &gt;= #{t.start}
+						</if>
+						<if test="t.operType != null and t.operType != ''">
+						  and 
+						     (INSTR(t.id,#{t.operType}||',')=1
+							OR INSTR(t.id,','||#{t.operType}||',')>0
+							OR t.id=#{t.operType}
+							OR 
+							length(t.id) = 
+							(CASE 
+								WHEN length(#{t.operType}) = length(t.id) 
+						    	THEN  -1  
+				        		ELSE  length(','||#{t.operType}||'')-1+INSTR(t.id,','||#{t.operType}) 
+				        		END ))  
+						</if>
+						
+				</where>
+			)a
+			
+			<where>
+				rownum &lt;= #{pageNo} * #{pageSize}
+			</where>
+	)b
+	<where>
+		b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+	</where>
+  
+	</select>
+	
+	<!-- 分页查询所有查验信息记录数 -->
+	<select id="findCount" resultType="Integer">
+		select count(1) from (
+			select z.dfe as aCount,
+  (case when z.counts is null then 0 when z.counts is not null then z.counts end)as cCount,
+   c.parent_name as parentName,
+   f.organ_name as organName,
+   (case when t.type_name is null then '变更备案' when t.type_name is not null then t.type_name end )as typeName 
+from(
+  select a.dfe,s.counts,a.organ_code,a.oper_type,a.cllx,a.crt_time
+    from (select count(*) as dfe, e.organ_code,e.oper_type,e.cllx,e.crt_time
+            from ck_info e
+           group by e.organ_code,e.oper_type,e.cllx,e.crt_time) a
+    left join (select count(*) as counts, b.organ_code,b.oper_type,b.cllx,b.crt_time
+                 from ck_info b
+                 where  b.audit_flag = '0'
+                group by b.organ_code,b.oper_type,b.cllx,b.crt_time
+              ) s
+     on s.organ_code=a.organ_code where a.organ_code is not null
+)z
+inner join ck_cllx c on c.cllx = z.cllx
+inner join chkpt_file f on f.organ_code = z.organ_code
+left join oper_type t on t.id = z.oper_type
+				 		<where>
+						<if test="organCode != null and organCode != ''">
+							and f.organ_code = #{organCode}
+						</if>
+						<if test="cllx != null and cllx != ''">
+							and c.p_cllx = #{t.cllx}
+						</if>
+						<if test="end != null and end != ''">
+							and to_char(z.crt_time, 'yyyy-mm-dd') &lt;= #{end}
+						</if>
+						<if test="start != null and start != ''">
+							and to_char(z.crt_time, 'yyyy-mm-dd') &gt;= #{start}
+						</if>
+						<if test="operType != null and operType != ''">
+						  and 
+						     (INSTR(t.id,#{operType}||',')=1
+							OR INSTR(t.id,','||#{operType}||',')>0
+							OR t.id=#{operType}
+							OR 
+							length(t.id) = 
+							(CASE 
+								WHEN length(#{operType}) = length(t.id) 
+						    	THEN  -1  
+				        		ELSE  length(','||#{operType}||'')-1+INSTR(t.id,','||#{operType}) 
+				        		END ))  
+						</if>
+						
+				</where>
+		)
+	</select>
+	<!-- 查询查验总记录数 -->
+	<select id="allCount" resultType="Integer">
+		select count(1) from (
+			select  i.ORGAN_CODE AS "organCode",
+                    i.oper_type as "operType",
+                    i.crt_time as "data"
+             from ck_info i
+             inner join ck_cllx c
+                on c.cllx = i.cllx
+             left join oper_type t on i.oper_type = t.id
+<where>
+	<if test="organCode != null and organCode != ''">
+		and i.organ_code = #{organCode}
+	</if>
+	<if test="cllx != null and cllx != ''">
+		and c.p_cllx = #{cllx}
+	</if>
+	<choose>
+		<when test="typeName == '变更备案'">
+			and t.parent_id is null
+		</when>
+		<otherwise>
+			and i.oper_type=#{typeName}
+		</otherwise>
+	</choose>
+	<if test="end != null and end != ''">
+		and to_char(i.crt_time, 'yyyy-mm-dd') &lt;= #{end}
+	</if>
+	<if test="start != null and start != ''">
+		and to_char(i.crt_time, 'yyyy-mm-dd') &gt;= #{start}
+	</if>
+</where>
+		)
+	</select>
+	<!-- 查询查验合格总记录数 -->
+	<select id="checkCount" resultType="Integer">
+		select count(1) from (
+			select i.ORGAN_CODE AS "organCode",
+               i.oper_type  as "operType",
+               i.crt_time   as "data"
+          from ck_info i
+          inner join ck_cllx c
+             on c.cllx = i.cllx
+          left join oper_type t on i.oper_type = t.id
+		<where>
+			<if test="organCode != null and organCode != ''">
+				and i.organ_code = #{organCode}
+			</if>
+			<if test="cllx != null and cllx != ''">
+				and c.p_cllx = #{cllx}
+			</if>
+			<choose>
+					<when test="typeName == '变更备案'">
+						and t.parent_id is null
+					</when>
+					<otherwise>
+						and i.oper_type=#{typeName}
+					</otherwise>
+				</choose>
+			<if test="end != null and end != ''">
+				and to_char(i.crt_time, 'yyyy-mm-dd') &lt;= #{end}
+			</if>
+			<if test="start != null and start != ''">
+				and to_char(i.crt_time, 'yyyy-mm-dd') &gt;= #{start}
+			</if>
+			and i.audit_flag = #{auditFlag}
+		</where>
+		)
+	</select>
+	<!-- 查询所有查验区 -->
+	<select id="allChkpt" resultType="com.vkl.ckts.common.entity.ChkptFileEntity">
+		select f.organ_code as "organCode",f.organ_name as "organName" from chkpt_file f
+	</select>
+	
+	<!-- 报废信息查询 -->
+	<select id="findBfxx" resultType="com.vkl.ckts.rgsy.statistic.count.entity.CheckCount">
+		select * from(
+		select a.*, rownum as rowno from(select SUM(1) as aCount
+		,e.syxz_name ,d.organ_name from
+		ck_info c ,chkpt_file d,ceh_usnr e
+		<where>
+		     c.syxz =e.syxz
+			and c.organ_code =d.organ_code
+			and c.syxz IN ('X', 'Y')
+			AND	c.audit_flag ='0'
+			and c.del_flag='0'
+			<if test="t.organCode != null and t.organCode != ''">
+				and c.organ_code= #{t.organCode}
+			</if>
+			<if test="t.end != null and t.end != ''">
+				and to_char(c.crt_time, 'yyyy-mm-dd') &lt;= #{t.end}
+			</if>
+			<if test="t.start != null and t.start != ''">
+				and to_char(c.crt_time, 'yyyy-mm-dd') &gt;= #{t.start}
+			</if>
+			<if test="t.syxz!= null and t.syxz != ''">
+				and c.syxz = #{t.syxz}
+			</if>
+		</where>
+		group by d.organ_name,e.syxz_name
+		)a
+		<where>
+			rownum &lt;= #{pageNo} * #{pageSize}
+		</where>
+		)b
+		<where>
+			b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+		</where>
+
+	</select>
+
+	<!--报废统计- -->
+	<select id="findBfxxCount" resultType="Integer">
+		select count(*) from(
+		select SUM(1) as aCount ,d.organ_name,c.syxz from
+		ck_info c ,chkpt_file d
+		<where>
+			and c.organ_code =d.organ_code
+			and c.syxz IN ('X', 'Y')
+			AND	c.audit_flag ='0'
+			and c.del_flag='0'
+			<if test="organCode != null and organCode != ''">
+				and c.organ_code= #{organCode}
+			</if>
+			<if test="end != null and end != ''">
+				and to_char(c.crt_time, 'yyyy-mm-dd') &lt;= #{end}
+			</if>
+			<if test="start != null and start != ''">
+				and to_char(c.crt_time, 'yyyy-mm-dd') &gt;= #{start}
+			</if>
+			<if test="syxz!= null and syxz != ''">
+				and c.syxz = #{syxz}
+			</if>
+		</where>
+		        group by d.organ_name,c.syxz
+		)
+
+
+	</select>
+	<!-- -按时间段查询报废信息 -->
+	<select id="findBfxxbyTmie" resultType="com.vkl.ckts.rgsy.statistic.count.entity.CheckCount">
+		select * from(
+		     select 
+		           a.*, 
+		           rownum as rowno
+		      from(
+						     select 
+						          sum(1)                            as               "aCount",
+						          sum(case when c.audit_flag='0'then 1 else 0 end) as "hgCount",
+						           (to_char(min(c.crt_time), 'yyyy-MM-dd')|| '-----' ||to_char(Max(c.crt_time), 'yyyy-MM-dd'))  as       "showTime" ,
+						          <if test="t.pSyxz!= null and t.pSyxz != ''">
+						             e.syxz_name                    as       "syxzName",
+						          </if>
+						         <if test="t.operType!= null and t.operType != ''">
+									 pe.TYPE_NAME                   as       "typeName",
+								 </if>
+						          d.organ_name                      as       "organName"
+						      from 
+								  ck_info c ,
+								  chkpt_file d,
+								  ceh_usnr e,
+								  OPER_TYPE pe
+							<where>
+							    c.RCK_COUNT = (select MAX(b.RCK_COUNT) from CK_INFO b group by b.SRLN HAVING b.SRLN=c.srln)
+							    and
+							        c.syxz =e.syxz
+								and 
+								    c.organ_code =d.organ_code
+								AND	
+								    c.OPER_STATU ='5'
+								and 
+								    c.del_flag='0'
+								and 
+								    pe.ID = c.OPER_TYPE
+								<if test="t.organCode != null and t.organCode != ''">
+									and c.organ_code= #{t.organCode}
+								</if>
+								<if test="t.end != null and t.end != ''">
+									and to_char(c.crt_time, 'yyyy-mm-dd') &lt;= #{t.end}
+								</if>
+								<if test="t.start != null and t.start != ''">
+									and to_char(c.crt_time, 'yyyy-mm-dd') &gt;= #{t.start}
+								</if>
+					
+								<if test="t.pSyxz!= null and t.pSyxz != ''">
+									and e.PARENT_ID = #{t.pSyxz}
+								</if>
+								<if test="t.operType!= null and t.operType != ''">
+									and c.OPER_TYPE = #{t.operType}
+								</if>
+							</where>
+						    group by 
+						             d.organ_name
+						            <if test=" t.time == null or t.time == '' ">
+						               ,to_char(c.crt_time,'YYYY-MM-DD')
+						            </if>
+						           <if test="t.pSyxz!= null and t.pSyxz != ''">
+						                ,e.syxz_name
+						          </if>
+						          <if test="t.operType!= null and t.operType != ''">
+									 ,pe.TYPE_NAME
+								 </if>
+						         
+		             ) a
+		<where>
+			rownum &lt;= #{pageNo} * #{pageSize}
+		</where>
+		)b
+		<where>
+			b.rowno &gt;= (#{pageNo} - 1) * #{pageSize}
+		</where>
+	</select>
+	<!-- -按时间段查询报废信息总数 -->
+	<select id="findBfxxbyTmieCount" resultType="Integer">
+		select count(*) from(
+		  select 
+						          sum(1)                            as       "aCount",
+						          (to_char(min(c.crt_time), 'yyyy-MM-dd')|| '-----' ||to_char(Max(c.crt_time), 'yyyy-MM-dd'))  as       "showTime" ,
+						          
+						          
+						          
+						          <if test="pSyxz!= null and pSyxz != ''">
+						             e.syxz_name                    as       "syxzName",
+						          </if>
+						         <if test="operType!= null and operType != ''">
+									 pe.TYPE_NAME                   as       "typeName",
+								 </if>
+						          d.organ_name                      as       "organName"
+						      from 
+								  ck_info c ,
+								  chkpt_file d,
+								  ceh_usnr e,
+								  OPER_TYPE pe
+							<where>
+							  c.RCK_COUNT = (select MAX(b.RCK_COUNT) from CK_INFO b group by b.SRLN HAVING b.SRLN=c.srln)
+							    and
+							        c.syxz =e.syxz
+								and 
+								    c.organ_code =d.organ_code
+								AND	
+								    c.OPER_STATU ='5'
+								and 
+								    c.del_flag='0'
+								and 
+								    pe.ID = c.OPER_TYPE
+								<if test="organCode != null and organCode != ''">
+									and c.organ_code= #{organCode}
+								</if>
+								<if test="end != null and end != ''">
+									and to_char(c.crt_time, 'yyyy-mm-dd') &lt;= #{end}
+								</if>
+								<if test="start != null and start != ''">
+									and to_char(c.crt_time, 'yyyy-mm-dd') &gt;= #{start}
+								</if>
+					
+								<if test="pSyxz!= null and pSyxz != ''">
+									and e.PARENT_ID = #{pSyxz}
+								</if>
+								<if test="operType!= null and operType != ''">
+									and c.OPER_TYPE = #{operType}
+								</if>
+							</where>
+						    group by 
+						            d.organ_name
+						            <if test=" time == null or time == '' ">
+						               ,to_char(c.crt_time,'YYYY-MM-DD')
+						            </if>
+						           <if test="pSyxz!= null and pSyxz != ''">
+						                ,e.syxz_name
+						          </if>
+						          <if test="operType!= null and operType != ''">
+									 ,pe.TYPE_NAME
+								 </if>
+               )
+	</select>
+	
+	
+	
+	
+</mapper>

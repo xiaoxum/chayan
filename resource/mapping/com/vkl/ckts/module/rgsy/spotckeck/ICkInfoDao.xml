@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.spotcheck.dao.ICkInfoDao">
+	<sql id="Columns">
+		a.srln as"srln" ,a.hphm as "hphm", a.hpzl as "hpzl", a.CRT_TIME as "createDate" ,c.organ_name as "organName",
+		b.type_name  ,a.P_AUDITER, a.RCK_COUNT as "rckCount",
+			  case 
+			  when b.type_name is null then '变更备案'
+			  when b.type_name is not null then b.type_name
+			  end typeName
+			  ,
+              case  
+              when a.AUDIT_FLAG=#{t.AUDIT_FLAG_NORMAL} then '已通过'                           
+              when a.AUDIT_FLAG=#{t.AUDIT_FLAG_DELETE} then '不通过' 
+              end as auditFlag
+            ,d.user_name as operaerName 
+            , f.CLSBDH as "clsbdh" 
+            ,
+              case  
+              when a.P_AUDITER is null then d.USER_NAME                           
+              when a.P_AUDITER is not null then g.USER_NAME 
+              end as pAuditerName
+            , 
+              case  
+              when a.P_AUDITER is null then a.AUDIT_TIME                           
+              when a.P_AUDITER is not null then a.P_AUDIT_TIME
+              end as auditTime  
+             
+	</sql>
+	
+	
+	<!-- 查询查验审核信息 -->
+	<select id="spotCheck" resultType="com.vkl.ckts.rgsy.spotcheck.entity.CkInfoDto">
+		
+		select 
+		<include refid="Columns"></include>
+		from 
+	    ck_info <if test="t.proportion!=null and t.proportion!=''">SAMPLE (${t.proportion})</if>  a 
+	    left join OPER_TYPE b 
+	    on a.oper_type=b.id
+	    inner join CHKPT_FILE c 
+	    on a.organ_code=c.ORGAN_CODE
+	    inner join users d
+	    on a.operaer=d.id
+	    inner join users g
+	    on a.P_AUDITER=g.id
+	    inner join VEH_INFO f
+	    on a.srln = f.srln
+	    <where>
+	          a.AUDIT_FLAG !=#{t.AUDIT_FLAG_WAIT} and  a.AUDIT_FLAG is not null 
+	    <if test="t.parentId!=null and t.parentId != ''"> and a.oper_type = #{t.parentId} </if>
+	    
+	     <if test="t.auditFlag!=null and t.auditFlag!='' "> 
+	    	and   a.AUDIT_FLAG = #{t.auditFlag} 
+	    </if>
+	    <if test="t.organName!=null and t.organName!='' "> 
+	    	and  c.organ_name like '%'||#{t.organName}||'%' 
+	     </if>
+	     <if test="t.startTime!=null and t.startTime!=''"> 
+	    	and  to_char(a.CRT_TIME,'yyyy-mm-dd') &gt;= #{t.startTime} 
+	    </if>
+	    <if test="t.endTime!=null and t.endTime!=''">
+	        and  to_char(a.CRT_TIME,'yyyy-mm-dd') &lt;=  #{t.endTime}
+	    </if>
+	    <if test="t.pAuditerName!=null and t.pAuditerName!='' "> 
+	    	and  pAuditerName like '%'||#{t.pAuditerName}||'%' 
+	    </if>
+	    </where>
+	      order by a.CRT_TIME desc
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="countNum" resultType="Integer">
+		select count(1)  from 
+	    ck_info a
+	    left join OPER_TYPE b 
+	    on a.oper_type=b.id
+	    inner join CHKPT_FILE c 
+	    on a.organ_code=c.ORGAN_CODE
+	    inner join users d
+	    on a.operaer=d.id
+	    inner join users g
+	    on a.P_AUDITER=g.id
+	    inner join VEH_INFO f
+	    on a.srln = f.srln
+	    <!-- where 
+ 		a.P_AUDITER=#{pAuditer} or a.P_AUDITER is null
+ 		and a.IS_P_AUDIT=#{isPAudit}
+ 		<if test="parentId!=null and parentId!=null"> and e.parent_id=#{t.parentId}</if>
+	     <if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''"> 
+	    	and  to_char(z.createDate,'yyyy-mm-dd') between #{t.startTime} and #{t.endTime}
+	    </if> -->
+	</select>
+	
+	
+</mapper>

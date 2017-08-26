@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.base.dao.AddpicDao">
+
+      
+    <select id="findPic" resultType="com.vkl.ckts.common.entity.OperPicProjectEntity">
+           select
+            a.OPER_TYPE as "operType",
+            a.SYXZ     as "syxz"
+           from 
+             OPER_PIC_PROJECT a
+             where 
+             a.OPER_TYPE=#{0}
+             and SYXZ=#{1}
+             and CLLX=#{2}
+             and PIC_PRO=#{3}
+    </select>
+   <select id="selectAll" resultType="com.vkl.ckts.common.entity.CehUsnrEntity">
+		select 
+		distinct
+		PARENT_ID as "parentId",
+		PARENT_NAME as "parentName"
+		from CEH_USNR
+	</select>
+	
+	<insert id="insertData" parameterType="com.vkl.ckts.common.entity.OperPicProjectEntity">
+		insert into oper_pic_project(
+			OPER_TYPE,
+			SYXZ,
+			CLLX,
+			PIC_PRO,
+			CRT_TIME,
+			CRTER,
+			DEL_FLAG,
+			PRINT_NUM
+		)values(
+			#{operType},
+			#{syxz},
+			#{cllx},
+			#{picPro},
+			#{createDate},
+			#{creater},
+			#{delFlag},
+			NVL(#{printNum}, 0)
+		)	
+	</insert>
+</mapper>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.vehicleinformation.dao.IVehicleInfoDao">
+
+	<sql id="Columns">
+		a.srln           as  "srln" ,
+		a.hphm           as   "hphm",
+		c.organ_name     as   "organName",
+		b.type_name      as   "typeName", 
+		a.crt_time       as   "createDate", 
+		e.ow_name        as   "owName", 
+		a.clsbdh         as   "clsbdh", 
+		a.sfdy           as   "sfdy",
+		a.RCK_COUNT      as   rckCount,
+         a.OPER_STATU    as   operStatu,
+		<!-- case
+		when a.OPER_STATU=1 then '外廓尺寸查验中'
+		when a.OPER_STATU=3 then 'pda查验中'
+		when a.OPER_STATU=4 then '审核中 '
+		when a.OPER_STATU=5 then '业务结束'
+		when a.OPER_STATU='B' then '外廓尺寸异常'
+		when a.OPER_STATU='Z' then '整备质量异常'
+		when a.OPER_STATU='P' then 'pda异常'
+		when a.OPER_STATU=6 then '退办'
+		when a.OPER_STATU=7 then '照片补拍'
+		end as operStatu, -->
+		a.AUDIT_FLAG     as    "auditFlag"
+		,d.user_name     as     userName
+		
+	</sql>
+
+
+	<!-- 查询查验车辆信息 -->
+	<select id="findByPage"
+		resultType="com.vkl.ckts.cksy.vehicleinformation.entity.CkInfoEntityDto">
+	
+		select * from (
+		select * from(
+		select rownum as rn, k.* from (
+		select
+		<include refid="Columns"></include>
+		,NVL(x.CLLX_NAME, ' ')   as  "cllxName"
+		,sr.PARENT_ID  as  "pSyxz"
+		,a.SYXZ        as  "syxz"
+		,a.CLLX        as  "cllx"
+		,ct.LDICTIONARY_ABEL  as  "hpzlName"
+		,d.CSYS          as     "csys"
+		from ck_info a
+		inner join OPER_TYPE b
+		on a.oper_type = b.id
+		inner join oper_appl e
+		on a.srln = e.srln
+		inner join CHKPT_FILE c
+		on a.organ_code = c.ORGAN_CODE
+		inner join users d
+		on a.operaer = d.id
+		inner join veh_info d
+		on a.srln=d.srln
+		inner join CK_CLLX x on x.CLLX=a.CLLX
+		inner join ceh_usnr sr on sr.SYXZ=a.SYXZ
+		left join DICT ct on ct.DICT_KEY=a.HPZL 
+		                  and ct.DICT_TYPE='hpzl'
+		<where>
+			a.RCK_COUNT = (select MAX(b.RCK_COUNT) from CK_INFO b group by b.SRLN
+			HAVING b.SRLN=a.srln)
+			<if test="t.parentId!=null and t.parentId != ''"> and a.oper_type = #{t.parentId} </if>
+			<if test="t.clsbdh!=null and t.clsbdh != '' "> and a.clsbdh like '%'||#{t.clsbdh}||'%'</if>
+			<if test="t.operStatu!=null and t.operStatu != '' "> and a.OPER_STATU=#{t.operStatu}</if>
+			<if test="t.hphm!=null and t.hphm != '' "> and a.hphm like '%'||#{t.hphm}||'%'</if>
+			<if test="t.sfdy!=null and t.sfdy != '' "> and a.sfdy=#{t.sfdy}</if>
+			<if test="t.auditFlag!=null and t.auditFlag != '' "> and a.AUDIT_FLAG=#{t.auditFlag}</if>
+			<if test="t.startTime!=null and t.startTime!='' ">
+				and to_char(a.crt_time,'yyyy-mm-dd') &gt;=#{t.startTime} 
+			</if>
+			<if test=" t.endTime!=null and t.endTime!=''">
+				and to_char(a.crt_time,'yyyy-mm-dd') &lt;=#{t.endTime}
+			</if>
+			<if test=" t.organCode!=null and t.organCode!=''">
+				and a.organ_code=#{t.organCode}
+			</if>
+		</where>
+		
+		order by a.crt_time desc
+        ) k
+		)j
+		where j.rn &lt;=#{pageSize}*#{pageNo}
+		)z
+		where z.rn &gt;#{pageSize}*(#{pageNo}-1)
+
+
+
+	</select>
+	<!-- where a.organ_code=#{t.organCode} -->
+
+	<!-- <if test="t.parentId!=null and t.parentId != '' "> and ( INSTR(''+a.oper_type+'',#{t.parentId}+',')=1 
+		OR INSTR(''+a.oper_type+'',','+#{t.parentId}+',')>0 OR a.oper_type=#{t.parentId} 
+		OR length(''+a.oper_type+'') = (CASE WHEN length(''+#{t.parentId}+'') = length(''+a.oper_type+'') 
+		THEN -1 ELSE length(','+#{t.parentId}+'')-1+INSTR(''+a.oper_type+'',','+#{t.parentId}) 
+		END ) ) </if> -->
+
+
+
+
+	<!-- 查询总数 -->
+	<select id="countNum" resultType="Integer">
+		select count(1) from(
+		select <include refid="Columns"></include>
+		 from
+		ck_info a inner join OPER_TYPE b
+		on a.oper_type=b.id
+		inner join oper_appl e
+		on a.srln = e.srln
+		inner join CHKPT_FILE c
+		on a.organ_code=c.ORGAN_CODE
+		inner join users d
+		on a.operaer=d.id
+		where 
+		 a.RCK_COUNT = (select MAX(b.RCK_COUNT) from CK_INFO b group by b.SRLN
+			HAVING b.SRLN=a.srln)
+		
+			<if test="parentId!=null and parentId != ''"> and a.oper_type = #{parentId} </if>
+			<if test="clsbdh!=null and clsbdh != '' "> and a.clsbdh=#{clsbdh}</if>
+			<if test="operStatu!=null and operStatu != '' "> and a.OPER_STATU=#{operStatu}</if>
+			<if test="hphm!=null and hphm != '' "> and a.hphm=#{hphm}</if>
+			<if test="auditFlag!=null and auditFlag != '' "> and a.AUDIT_FLAG=#{auditFlag}</if>
+			<if test="sfdy!=null and sfdy != '' "> and a.sfdy=#{sfdy}</if>
+			<if test="startTime!=null and startTime!='' ">
+				and to_char(a.crt_time,'yyyy-mm-dd') &gt;=#{startTime}
+			</if> 
+			<if test=" endTime!=null and endTime!='' ">
+				and to_char(a.crt_time,'yyyy-mm-dd') &lt;=#{endTime}
+			</if>
+			<if test=" organCode!=null and organCode!=''">
+				and a.organ_code=#{organCode}
+			</if>	
+		)	
+		
+	</select>
+
+	<!-- 查询车辆信息 -->
+	<select id="findVehicleInfo"
+		resultType="com.vkl.ckts.cksy.vehicleinformation.entity.CkInfoEntityDto">
+		select
+		a.srln as "srln",
+		a.hphm as "hphm",
+		a.syxz as "syxz",
+		a.cllx as "cllx",
+		a.AUDIT_FLAG as"auditFlag",
+		a.P_AUDIT_FLAG as "pAuditFlag",
+		b.ldictionary_abel as "ldictionaryAbel",
+		c.organ_name as "organName",
+		c.VIDEO_IP      as  "videoId",
+		c.VIDEO_PORT    as  "videoPort",
+		a.oper_type as "operType",
+		b.type_name      as   "typeName", 
+		d.clpp1 as "clpp",
+		d.clxh as "clxh",
+		d.csys as "csys",
+		a.cker as "cker",
+		a.clsbdh         as   "clsbdh", 
+		a.RCK_COUNT as rckCount,
+		a.REMAKS_INFO  as "remaksInfo"
+		,s.USER_NAME as "auditerName",
+		a.OPER_STATU  as "operStatu"
+		,ct.LDICTIONARY_ABEL  as  "hpzlName"
+		,NVL(x.CLLX_NAME, ' ')   as  "cllxName",
+		d.HDZK                   as    "hdzk",
+		nr.SYXZ_NAME             as      "syxzName"
+		from
+		ck_info a left join dict b
+		on a.hpzl=b.dict_key and  b.dict_type=#{dictType}
+		inner join CHKPT_FILE c
+		on a.organ_code=c.ORGAN_CODE
+		inner join CK_CLLX x on x.CLLX=a.CLLX
+		inner join veh_info d
+		on a.srln=d.srln
+			inner join OPER_TYPE b
+		on a.oper_type = b.id
+		inner join 
+		    CEH_USNR  nr
+		    on
+		       nr.SYXZ = a.SYXZ
+		  
+		left join USERS s on s.ID=P_AUDITER
+		left join DICT ct on ct.DICT_KEY=a.HPZL 
+		                  and ct.DICT_TYPE='hpzl'
+		where
+		a.srln=#{srln} and  a.RCK_COUNT =#{rckCount}
+	</select>
+
+
+	<!-- 查询业务类型名称 -->
+	<select id="findAllOperType" resultType="String">
+		select type_name
+		from oper_type where
+		id in
+		<foreach collection="array" item="opertypes" index="index"
+			open="(" close=")" separator=",">
+			#{opertypes}
+		</foreach>
+	</select>
+	<!-- 查询查验员姓名 -->
+	<select id="findAllCker" resultType="String">
+		select view_name from viewer_file
+		where file_id in
+		<foreach collection="array" item="ckers" index="index" open="("
+			close=")" separator=",">
+			#{ckers}
+		</foreach>
+	</select>
+	<update id="updataInfo">
+		update ck_info set
+		P_AUDIT_FLAG=#{pAuditFlag}
+		where
+		srln=#{srln} and RCK_COUNT =#{rckCount}
+	</update>
+
+   <delete id="deleteCkInfo">
+       delete 
+       from 
+        ck_info
+        where 
+         srln=#{0} and RCK_COUNT =#{1}
+   </delete>
+
+    <!-- 查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT where id=#{0}
+	</select>
+	
+	<select id="deletePicRcords">
+	  delete 
+	  from 
+	  pic_record
+	    where 
+         srln=#{0} and RCK_COUNT =#{1}
+	</select>
+	
+	<select id="deleteProjectRcords">
+	  delete 
+	  from 
+	  pic_record
+	    where 
+         srln=#{0} and RCK_COUNT =#{1}
+	</select>
+	
+</mapper>

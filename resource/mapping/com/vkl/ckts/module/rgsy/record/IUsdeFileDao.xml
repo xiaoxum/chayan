@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.vkl.ckts.rgsy.record.dao.IUsdeFileDao">
+	<sql id = "usdeFileColumns">
+		FILE_ID as "fileId",
+		FILE_PRO_NAME as "fileProName",
+		CK_VEHS as "ckVehs",
+		USNR as "usnr",
+		OPER_TYPE as "operType",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		AUDIT_TIME as "auditTime",
+		AUDIT_FLAG as "auditFlag",
+		ID as "id",
+		FILE_TIME as "fileTime",
+		FILER_RG_JOP as "filerRgJop",
+		LOGOFF_TIME as "logoffTime",
+		CK_APPLER_JOP as "fileApplerJop",
+		LOCAL_STATU as "localStatu",
+		FILE_STATU as "fileStatu",
+		PRO_ID as "proId"
+	
+	</sql>
+
+	<!--添加自定义项目备案申请  -->
+	<insert id="addUsdeFile">
+		insert into USDE_PRO_FILE(
+			FILE_ID,
+			FILE_PRO_NAME,
+			CK_VEHS,
+			USNR,
+			OPER_TYPE,
+			CRT_TIME,
+			CRTER,
+			UPD_TIME,
+			UPDER,
+			DEL_FLAG,
+			AUDIT_TIME,
+			AUDIT_FLAG,
+			ID,
+			FILE_TIME,
+			FILER_RG_JOP,
+			LOGOFF_TIME,
+			CK_APPLER_JOP,
+			LOCAL_STATU,
+			FILE_STATU,
+			PRO_ID
+		) values(
+			#{fileId},
+			#{fileProName},
+			#{ckVehs},
+			#{usnr},
+			#{operType},
+			#{createDate},
+			#{creater},
+			#{updDate},
+			#{updater},
+			#{delFlag},
+			#{auditTime},
+			#{auditFlag},
+			seq_record.nextval,
+			#{fileTime},
+			#{filerRgJop},
+			#{logoffTime},
+			#{fileApplerJop},
+			#{localStatu},
+			#{fileStatu},
+			#{proId}
+		)
+	</insert>
+	
+	<!-- 分页查询自定义项目备案信息 -->
+	<select id="pageUsdeFile" resultType="com.vkl.ckts.common.entity.UsdeProFileEntity">
+		select <include refid="usdeFileColumns"></include> from (
+			select rownum as rowno,a.* from (
+				select * from USDE_PRO_FILE 
+				<where>
+					DEL_FLAG = #{t.DEL_FLAG_NORMAL}
+					<if test = "t.fileId != null and t.fileId != ''">
+						and FILE_ID like '%'||#{t.fileId}||'%'
+					</if>
+					<if test = "t.proId != null and t.proId != ''">
+						and PRO_ID = #{t.proId}
+					</if>
+				</where>
+				order by UPD_TIME desc) a
+			where rownum &lt;= #{pageSize} * #{pageNo}) b
+		where b.rowno > #{pageSize} * (#{pageNo} - 1) 
+	</select>
+	
+	<!-- 查询自定义项目备案信息总记录数 -->
+	<select id="findCount" parameterType="com.vkl.ckts.common.entity.UsdeProFileEntity" resultType="Integer">
+		select count(1) from USDE_PRO_FILE
+		<where>
+			DEL_FLAG = #{DEL_FLAG_NORMAL}
+			<if test="fileId != null and fileId != ''">
+				and FILE_ID like '%'||#{fileId}||'%'
+			</if>
+			<if test = "proId != null and proId != ''">
+				and PRO_ID = #{proId}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 根据自定义项目编号逻辑删除备案信息 -->
+	<select id="deleteUsdeFileById" parameterType="com.vkl.ckts.common.entity.UsdeProFileEntity">
+		update USDE_PRO_FILE 
+			set DEL_FLAG = #{DEL_FLAG_DELETE} 
+			where ID = #{id}
+	</select>
+	
+	<!-- 根据自定义项目编号查找备案信息 -->
+	<select id="findUsdeFileById" resultType="com.vkl.ckts.common.entity.UsdeProFileEntity">
+		select <include refid = "usdeFileColumns"></include> from USDE_PRO_FILE 
+			where ID = #{id}
+	</select>
+	
+	<!-- 更新备案信息 -->
+	<update id="updateUsdeFile" parameterType="com.vkl.ckts.common.entity.UsdeProFileEntity">
+		update USDE_PRO_FILE
+		set FILE_ID = #{fileId},
+			FILE_PRO_NAME = #{fileProName},
+			CK_VEHS = #{ckVehs},
+			USNR = #{usnr},
+			OPER_TYPE = #{operType},
+			CRT_TIME = #{createDate},
+			CRTER = #{creater},
+			UPD_TIME = #{updDate},
+			UPDER = #{updater},
+			DEL_FLAG = #{delFlag},
+			AUDIT_TIME = #{auditTime},
+			AUDIT_FLAG = #{auditFlag},
+			FILE_TIME = #{fileTime},
+			FILER_RG_JOP = #{filerRgJop},
+			LOGOFF_TIME = #{logoffTime},
+			CK_APPLER_JOP = #{fileApplerJop},
+			LOCAL_STATU = #{localStatu},
+			FILE_STATU = #{fileStatu},
+			PRO_ID = #{proId}
+		where ID = #{id}
+	</update>
+	
+	<!-- 根据项目id修改查验项目的状态 -->
+	<update id="updateCkProState" parameterType="com.vkl.ckts.common.entity.CkProjectEntity">
+		update CK_PROJECT set IS_ENABLE = #{isEnable} where id = #{id}
+	</update>
+	
+	<!-- 根据业务类型id查找业务名称 -->
+	<select id="findOperTypeById" resultType="String">
+		select type_name from oper_type where id=#{id}
+	</select>
+	
+	<!-- 根据车辆类型父级id查找父级名称 -->
+	<select id="findCkVehByParentId" resultType="String">
+		select parent_name from ck_cllx where p_cllx=#{parentCllx} and rownum=1
+	</select>
+	
+	<!-- 根据使用性质父类id查找父级名称-->
+	<select id="findUsnrByParentId" resultType="String">
+		select parent_Name from ceh_usnr  where parent_id=#{parentId} and rownum=1
+	</select>
+</mapper>

@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.cksy.servacpt.dao.IOperApplDao">
+	<!-- 注册登记，注销，转入，转移业务申请表 -->
+	<sql id="OperApplColumns">
+		ID as "id",
+		HPZL as "hpzl",
+		HPHM as "hphm",
+		OPER_TYPE as "operType",
+		CLPP as "clpp",
+		CLXH as "clxh",
+		CLSBDH as "clsbdh",
+		GET_WAY as "getWay",
+		SYXZ as "syxz",
+		OW_NAME as "owName",
+		OW_ADDR as "owAddr",
+		OW_POSTCODE as "owPostcode",
+		OW_TELE as "owTele",
+		OW_PHONE as "owPhone",
+		OW_EMIAL as "owEmial",
+		OW_IDENDITY as "owIdentity",
+		PROXY_NAME as "proxyName",
+		PROXY_ADDR as "proxyAddr",
+		PROXY_TELE as "proxyTele",
+		PROXY_PHONE as "proxyPhone",
+		PROXY_EMAIL as "proxyEmail",
+		PROXY_POSTCODE as "proxyPostcode",
+		LOGOFF_CAUSE as "logoffCause",
+		TRANFER_ADDR as "tranferAddr",
+		CRT_TIME as "createDate",
+		CRTER as "creater",
+		UPD_TIME as "updDate",
+		UPDER as "updater",
+		DEL_FLAG as "delFlag",
+		SRLN as "srln",
+		RCK_APPL_COUNT as "rckApplCount"
+	</sql>
+	<!-- 合格证信息表 -->
+	<sql id="VehCertifiInfoColumns">
+		XH as "xh",
+		RECORD_TIME as "recordTime",
+		HPHM as "hphm",
+		HPZL as "hpzl",
+		CLPP1 as "clpp1",
+		CLXH as "clxh",
+		CLPP2 as "clpp2",
+		GCJK as "gcjk",
+		ZZG as "zzg",
+		ZZCMC as "zzcmc",
+		CLSBDH as "clsbdh",
+		FDJH as "fdjh",
+		CLLX as "cllx",
+		CSYS as "csys",
+		SYXZ as "syxz",
+		SFZMHM as "sfzmhm",
+		SFZMMC as "sfzmmc",
+		SYR as "syr",
+		CCDJRQ as "ccdjrq",
+		DJRQ as "djrq",
+		YXQZ as "yxqz",
+		QZBFQZ as "qzbfqz",
+		FZJG as "fzjg",
+		GLBM as "glbm",
+		BXZZRQ as "bxzzrq",
+		ZT as "zt",
+		DYBJ as "dybj",
+		FDJXH as "fdjxh",
+		RLZL as "rlzl",
+		PL as "pl",
+		GL as "gl",
+		ZXXS as "zxxs",
+		CWKC as "cwkc",
+		CWKK as "cwkk",
+		CWKG as "cwkg",
+		HXNBCD as "hxnbcd",
+		HXNBKD as "hxnbkd",
+		HXNBGD as "hxnbgd",
+		GBTHPS as "gbthps",
+		ZS as "zs",
+		ZJ as "zj",
+		QLJ as "qlj",
+		HLJ as "hlj",
+		LTGG as "ltgg",
+		LTS as "lts",
+		ZZL as "zzl",
+		ZBZL as "zbzl",
+		HDZZL as "hdzzl",
+		HDZK as "hdzk",
+		ZQYZL as "zqyzl",
+		QPZK as "qpzk",
+		HPZK as "hpzk",
+		HBDBQK as "hbdbqk",
+		CCRQ as "ccrq",
+		CLYT as "clyt",
+		YTSX as "ytsx",
+		JYHGBZBH as "jyhgbzbh",
+		XSZBH as "xszbh",
+		XZQH as "xzqh",
+		ZSXZQH as "zsxzqh",
+		ZSXXDZ as "zsxxdz",
+		SGCSSBWQK as "sgcssbwqk",
+		SFMJ as "sfmj",
+		BMJYY as "bmjyy",
+		CLLY as "clly",
+		SRLN as "srln"
+	</sql>
+	
+	
+	<!-- 添加注册登记，注销，转入，转移业务申请 -->
+	<insert id="addOperAppl" parameterType="com.vkl.ckts.common.entity.OperApplEntity" >
+	   <selectKey resultType="String" order="BEFORE" keyProperty="id">  
+       SELECT SEQ_APPL.Nextval as id from DUAL  
+        </selectKey> 
+		insert into 
+		OPER_APPL(id,HPZL,HPHM,OPER_TYPE
+		<if test='operType =="E"'>,LOGOFF_CAUSE</if>
+		<if test='operType =="A"'>,GET_WAY</if>
+		<if test='operType =="G"'>,TRANFER_ADDR</if> 
+		,CLXH,CLSBDH,SYXZ,OW_NAME,OW_ADDR,OW_POSTCODE,OW_PHONE,OW_IDENTITY
+		 <if test="owEmial!=''and owEmial!=null">,OW_EMIAL</if>
+		 <if test="owTele!=''and owTele!=null">,OW_TELE</if>
+		<if test="proxyTele!=''and proxyTele!=null">,PROXY_TELE</if>
+		<if test="proxyPhone!=''and proxyPhone!=null">,PROXY_PHONE</if>
+		<if test="proxyAddr!=''and proxyAddr!=null">,PROXY_ADDR</if>
+		<if test="proxyPostcode!=''and proxyPostcode!=null">,PROXY_POSTCODE</if>
+		<if test="proxyName!=''and proxyName!=null">,PROXY_NAME</if>
+		<if test="proxyEmail!=''and proxyEmail!=null">,PROXY_EMAIL</if>
+		<if test="chContent!=''and chContent!=null">CH_CONTENT</if>
+		,CRT_TIME,CRTER,SRLN,DEL_FLAG
+		) 
+		values(#{id},#{hpzl},#{hphm},#{operType}
+	   <if test='operType =="E"'>,#{logoffCause}</if>
+		<if test='operType =="A"'>,#{getWay}</if>
+		<if test='operType =="G"'>,#{tranferAddr}</if> 
+		,#{clxh},#{clsbdh},#{syxz},#{owName},#{owAddr},#{owPostcode},#{owPhone},#{owIdentity}
+		<if test="owEmial!=''and owEmial!=null">,#{owEmial}</if>
+		<if test="owTele!=''and owTele!=null">,#{owTele}</if>
+		<if test="proxyTele!=''and proxyTele!=null">,#{proxyTele}</if>
+		<if test="proxyPhone!=''and proxyPhone!=null">,#{proxyPhone}</if>
+		<if test="proxyAddr!=''and proxyAddr!=null">,#{proxyAddr}</if>
+		<if test="proxyPostcode!=''and proxyPostcode!=null">,#{proxyPostcode}</if>
+		<if test="proxyName!=''and proxyName!=null">,#{proxyName}</if>
+		<if test="proxyEmail!=''and proxyEmail!=null">,#{proxyEmail}</if> 
+		<if test="proxyEmail!=''and proxyEmail!=null">,#{proxyEmail}</if> 
+		<if test="chContent!=''and chContent!=null">#{chContent}</if>
+		,#{createDate},#{creater},#{srln},#{DEL_FLAG_NORMAL}
+		)
+	
+	</insert>
+	<!-- 添加车辆基本信息 -->
+	<insert id="insertVehBaseInfo">
+	     insert into VEHICLE
+                   (XH,
+                     HPHM,
+                     HPZL,
+                     CLPP1,
+                     CLXH,
+                     CLPP2,
+                     GCJK,
+                     ZZG,
+                     ZZCMC,
+                     CLSBDH,
+                     FDJH,
+                     CLLX,
+                     CSYS,
+                     SYXZ,
+                     SFZMHM,
+                     SFZMMC,
+                     SYR,
+                     CCDJRQ,
+                     DJRQ,
+                     YXQZ,
+                     QZBFQZ,
+                     FZJG,
+                     GLBM,
+                     BXZZRQ,
+                     ZT,
+                     DYBJ,
+                     FDJXH,
+                     RLZL,
+                     PL,
+                     GL,
+                     ZXXS,
+                     CWKC,
+                     CWKK,
+                     CWKG,
+                     HXNBCD,
+                     HXNBKD,
+                     HXNBGD,
+                     GBTHPS,
+                     ZS,
+                     ZJ,
+                     QLJ,
+                     HLJ,
+                     LTGG,
+                     LTS,
+                     ZZL,
+                     ZBZL,
+                     HDZZL,
+                     HDZK,
+                     ZQYZL,
+                     QPZK,
+                     HPZK,
+                     HBDBQK,
+                     CCRQ,
+                     CLYT,
+                     YTSX,
+                     JYHGBZBH,
+                     XSZBH,
+                     XZQH,
+                     ZSXZQH,
+                     ZZXZQH,
+                    
+                     BZ) values(
+                     #{xh}, 
+                     #{hphm}, 
+                     #{hpzl}, 
+                     #{clpp1}, 
+                     #{clxh}, 
+                     #{clpp2}, 
+                     #{gcjk}, 
+                     #{zzg}, 
+                     #{zzcmc}, 
+                     #{clsbdh}, 
+                     #{fdjh}, 
+                     #{cllx}, 
+                     #{csys},
+                     #{syxz},   
+                     #{sfzmhm}, 
+                     #{sfzmmc}, 
+                     #{syr}, 
+                     #{ccdjrq}, 
+                     #{djrq}, 
+                     #{yxqz}, 
+                     #{qzbfqz}, 
+                     #{fzjg}, 
+                     #{glbm}, 
+                     #{bxzzrq}, 
+                     #{zt}, 
+                     #{dybj}, 
+                     #{fdjxh}, 
+                     #{rlzl}, 
+                     #{pl}, 
+                     #{gl}, 
+                     #{zxxs}, 
+                     #{cwkc}, 
+                     #{cwkk}, 
+                     #{cwkg}, 
+                     #{hxnbcd}, 
+                     #{hxnbkd}, 
+                     #{hxnbgd}, 
+                     #{gbthps}, 
+                     #{zs}, 
+                     #{zj}, 
+                     #{qlj}, 
+                     #{hlj}, 
+                     #{ltgg}, 
+                     #{lts}, 
+                     #{zzl}, 
+                     #{zbzl}, 
+                     #{hdzzl}, 
+                     #{hdzk}, 
+                     #{zqyzl}, 
+                     #{qpzk}, 
+                     #{hpzk}, 
+                     #{hbdbqk}, 
+                     #{ccrq}, 
+                     #{clyt}, 
+                     #{ytsx}, 
+                     #{jyhgbzbh}, 
+                     #{xszbh}, 
+                     #{xzqh}, 
+                     #{zsxzqh},
+                     #{zzxzqh},
+                   
+                     #{bz}
+                 )
+	</insert>
+    
+    
+    <select id="findVehBaseInfo" resultType="com.vkl.ckts.cksy.servacpt.entity.TJbxx">
+         select
+                     XH,
+                     HPHM,
+                     HPZL,
+                     CLPP1,
+                     CLXH,
+                     CLPP2,
+                     GCJK,
+                     ZZG,
+                     ZZCMC,
+                     CLSBDH,
+                     FDJH,
+                     CLLX,
+                     CSYS,
+                     SYXZ,
+                     SFZMHM,
+                     SFZMMC,
+                     SYR,
+                     CCDJRQ,
+                     DJRQ,
+                     YXQZ,
+                     QZBFQZ,
+                     FZJG,
+                     GLBM,
+                     BXZZRQ,
+                     ZT,
+                     DYBJ,
+                     FDJXH,
+                     RLZL,
+                     PL,
+                     GL,
+                     ZXXS,
+                     CWKC,
+                     CWKK,
+                     CWKG,
+                     HXNBCD,
+                     HXNBKD,
+                     HXNBGD,
+                     GBTHPS,
+                     ZS,
+                     ZJ,
+                     QLJ,
+                     HLJ,
+                     LTGG,
+                     LTS,
+                     ZZL,
+                     ZBZL,
+                     HDZZL,
+                     HDZK,
+                     ZQYZL,
+                     QPZK,
+                     HPZK,
+                     HBDBQK,
+                     CCRQ,
+                     CLYT,
+                     YTSX,
+                     JYHGBZBH,
+                     XSZBH,
+                     XZQH,
+                     ZSXZQH,
+                     ZZXZQH,
+                    
+                     BZ
+         from 
+                  VEHICLE
+         
+          WHERE 
+                 HPZL=#{0}
+             and
+                 HPHM=#{1}
+    </select>
+	
+	
+	  <select id="findVehBaseInfo1" resultType="com.vkl.ckts.cksy.servacpt.entity.TJbxx">
+         select
+                     XH,
+                     HPHM,
+                     HPZL,
+                     CLPP1,
+                     CLXH,
+                     CLPP2,
+                     GCJK,
+                     ZZG,
+                     ZZCMC,
+                     CLSBDH,
+                     FDJH,
+                     CLLX,
+                     CSYS,
+                     SYXZ,
+                     SFZMHM,
+                     SFZMMC,
+                     SYR,
+                     CCDJRQ,
+                     DJRQ,
+                     YXQZ,
+                     QZBFQZ,
+                     FZJG,
+                     GLBM,
+                     BXZZRQ,
+                     ZT,
+                     DYBJ,
+                     FDJXH,
+                     RLZL,
+                     PL,
+                     GL,
+                     ZXXS,
+                     CWKC,
+                     CWKK,
+                     CWKG,
+                     HXNBCD,
+                     HXNBKD,
+                     HXNBGD,
+                     GBTHPS,
+                     ZS,
+                     ZJ,
+                     QLJ,
+                     HLJ,
+                     LTGG,
+                     LTS,
+                     ZZL,
+                     ZBZL,
+                     HDZZL,
+                     HDZK,
+                     ZQYZL,
+                     QPZK,
+                     HPZK,
+                     HBDBQK,
+                     CCRQ,
+                     CLYT,
+                     YTSX,
+                     JYHGBZBH,
+                     XSZBH,
+                     XZQH,
+                     ZSXZQH,
+                     ZZXZQH,
+                    
+                     BZ
+         from 
+                  VEH_OLD1
+         
+          WHERE 
+                 HPZL=#{0}
+             and
+                 HPHM=#{1}
+    </select>
+	
+		  <select id="findVehBaseInfo2" resultType="com.vkl.ckts.cksy.servacpt.entity.TJbxx">
+              select
+                     XH,
+                     HPHM,
+                     HPZL,
+                     CLPP1,
+                     CLXH,
+                     CLPP2,
+                     GCJK,
+                     ZZG,
+                     ZZCMC,
+                     CLSBDH,
+                     FDJH,
+                     CLLX,
+                     CSYS,
+                     SYXZ,
+                     SFZMHM,
+                     SFZMMC,
+                     SYR,
+                     CCDJRQ,
+                     DJRQ,
+                     YXQZ,
+                     QZBFQZ,
+                     FZJG,
+                     GLBM,
+                     BXZZRQ,
+                     ZT,
+                     DYBJ,
+                     FDJXH,
+                     RLZL,
+                     PL,
+                     GL,
+                     ZXXS,
+                     CWKC,
+                     CWKK,
+                     CWKG,
+                     HXNBCD,
+                     HXNBKD,
+                     HXNBGD,
+                     GBTHPS,
+                     ZS,
+                     ZJ,
+                     QLJ,
+                     HLJ,
+                     LTGG,
+                     LTS,
+                     ZZL,
+                     ZBZL,
+                     HDZZL,
+                     HDZK,
+                     ZQYZL,
+                     QPZK,
+                     HPZK,
+                     HBDBQK,
+                     CCRQ,
+                     CLYT,
+                     YTSX,
+                     JYHGBZBH,
+                     XSZBH,
+                     XZQH,
+                     ZSXZQH,
+                     ZZXZQH,
+                    
+                     BZ
+          from 
+                  VEH_OLD
+          WHERE 
+                 HPZL=#{0}
+             and
+                 HPHM=#{1}
+    </select>
+	
+	
+    <update id="updateVehBaseInfo">
+         update 
+               VEHICLE
+           set
+                     
+                     HPHM=#{hphm},
+                     HPZL=#{hpzl},
+                     CLPP1=#{clpp1},
+                     CLXH=#{clxh},
+                     CLPP2=#{clpp2},
+                     GCJK=#{gcjk},
+                     ZZG=#{zzg},
+                     ZZCMC=#{zzcmc},
+                     CLSBDH=#{clsbdh},
+                     FDJH=#{fdjh},
+                     CLLX=#{cllx},
+                     CSYS=#{csys},
+                     SYXZ=#{syxz},
+                     SFZMHM=#{sfzmhm},
+                     SFZMMC=#{sfzmmc},
+                     SYR=#{syr},
+                     CCDJRQ=#{ccdjrq},
+                     DJRQ=#{djrq},
+                     YXQZ=#{yxqz},
+                     QZBFQZ=#{qzbfqz},
+                     FZJG=#{fzjg},
+                     GLBM=#{glbm},
+                     BXZZRQ=#{bxzzrq},
+                     ZT=#{zt},
+                     DYBJ=#{dybj},
+                     FDJXH=#{fdjxh},
+                     RLZL=#{lzl},
+                     pl=#{pl},
+                     gl=#{gl},
+                     zxxs=#{zxxs},
+                     cwkc=#{cwkc},
+                     cwkk=#{cwkk},
+                     cwkg=#{cwkg},
+                     hxnbcd=#{hxnbcd},
+                     hxnbkd=#{hxnbkd},
+                     hxnbgd=#{hxnbgd},
+                     gbthps=#{gbthps},
+                     zs=#{zs},
+                     zj=#{zj},
+                     qlj=#{qlj},
+                     hlj=#{hlj},
+                     ltgg=#{ltgg},
+                     lts=#{lts},
+                     zzl=#{zzl},
+                     zbzl=#{zbzl},
+                     hdzzl=#{hdzzl},
+                     hdzk=#{hdzk},
+                     zqyzl=#{zqyzl},
+                     qpzk=#{qpzk},
+                     hpzk=#{hpzk},
+                     hbdbqk=#{hbdbqk},
+                     ccrq=#{ccrq},
+                     clyt=#{clyt},
+                     ytsx=#{ytsx},
+                     jyhgbzbh=#{jyhgbzbh},
+                     xszbh=#{xszbh},
+                     xzqh=#{xzqh},
+                     zsxzqh=#{zsxzqh},
+                     zzxzqh=#{zzxzqh},
+                    
+                     bz=#{bz}
+    
+    
+    
+    </update>
+    
+    
+    <select id="findCsysfromDict"  resultType="java.lang.String">
+    	select
+    	 LDICTIONARY_ABEL
+    	from 
+    	dict
+    	where 
+    	  DICT_KEY=#{0}
+    	  and DICT_TYPE=#{1} 
+    </select>
+    
+    	<!-- 根据id查找部门 -->
+	<select id="findDeptById" resultType="com.vkl.ckts.common.entity.DeptEntity">
+		select * from DEPT
+		<where>
+			DEL_FLAG = '0'
+			
+				and ID = #{id}
+			
+		</where>
+	</select>
+	
+	<update id="updateCllxProSort">
+	       update 
+	         CK_CLLX
+	       set 
+	          SORT=SORT+1  
+	       where 
+	           CLLX=#{cllx}
+	
+	</update>
+	
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vkl.ckts.rgsy.system.set.dao.ISetDao">
+	<!-- 查询系统设置当前状态 -->
+	<select id="selStatu" resultType="com.vkl.ckts.common.entity.SysConfigEntity">
+		select s.key as key,s.val as value from sys_config s where key = #{key}
+	</select>
+	
+	<!-- 修改系统设置状态 -->
+	<update id="updStatu" parameterType="com.vkl.ckts.common.entity.SysConfigEntity">
+		update sys_config set val = #{value} where key = #{key}
+	</update>
+</mapper>
