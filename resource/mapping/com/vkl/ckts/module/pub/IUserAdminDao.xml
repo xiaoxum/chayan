@@ -12,7 +12,8 @@
 					u.user_statu as userStatu,
          			NVL(d.dept_name,' ') as deptName,
          			u.upd_time,
-					NVL((select wm_concat(o.role_name) 
+         			u.IS_FILER      as     isFiler,
+					NVL((select wm_concat(o.role_name)
 		            from user_role r inner join role  o on r.role_id= o.id 
 		            where r.use_id = u.id),' ') as uRole 
 					from users u

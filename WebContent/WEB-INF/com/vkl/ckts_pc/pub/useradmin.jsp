@@ -43,8 +43,17 @@
   
   <div id="p" class="easyui-panel" title="用户一览表" style="width:100%;"> 
   <table width="100%" height="100%" align="center" cellspacing="0" cellpadding="0" id="tab">
-     <thead height="30"><th>选择</th><th>用户账号</th><th>用户名称</th><th>性别</th><th>警员编号</th><th>部  门</th><th>用户角色</th><th>用户状态</th></thead>
-     
+     <thead height="30">
+          <th style='width:3%;'>选择</th>
+          <th style='width:7%;'>用户账号</th>
+          <th style='width:10%;'>用户名称</th>
+          <th style='width:4%;'>性别</th>
+          <th style='width:6%;'>警员编号</th>
+          <th style='width:8%;'>用户角色</th>
+          <th style='width:15%;'>部  门</th>
+          <th style='width:5%;'>用户状态</th>
+          <th style='width:5%;'>备案人员</th>
+       </thead>
      <tbody id="tbody">
      
      </tbody>
@@ -110,25 +119,28 @@
 					if (currentUser == dt.id) {
 						return true;
 					}
+					var isfilter=(dt.isFiler=='1')?"是":"否";
 					if(index % 2 == 1){
 						info = "<tr class='rowbgcolor'>"
-								+"<td class='texcenter' style='width:8%;'><input type='radio' name='sel' value='"+dt.id+"'></td>"
-								+"<td style='width:15%;'>"+dt.loginName+"</td><td style='width:20%;'>"+dt.userName+"</td>"
-								+"<td style='width:8%;'>"+dt.userSex+"</td>"
-								+"<td style='width:10%;'>"+dt.fuzz+"</td>"
-								+"<td style='width:20%;'>"+dt.uRole+"</td>"
+								+"<td class='texcenter'><input type='radio' name='sel' value='"+dt.id+"'></td>"
+								+"<td>"+dt.loginName+"</td><td style='width:20%;'>"+dt.userName+"</td>"
+								+"<td>"+dt.userSex+"</td>"
+								+"<td>"+dt.fuzz+"</td>"
+								+"<td>"+dt.uRole+"</td>"
 								+"<td>"+dt.deptName+"</td>"
-								+"<td style='width:10%;'>"+dt.userStatu+"</td>"
+								+"<td>"+dt.userStatu+"</td>"
+								+"<td>"+isfilter+"</td>"
 								+"</tr>";
 					}else{
 						info = "<tr>"
-							+"<td class='texcenter' style='width:8%;'><input type='radio' name='sel' value='"+dt.id+"'></td>"
-							+"<td style='width:15%;'>"+dt.loginName+"</td><td style='width:20%;'>"+dt.userName+"</td>"
-							+"<td style='width:8%;'>"+dt.userSex+"</td>"
-							+"<td style='width:10%;'>"+dt.fuzz+"</td>"
-							+"<td style='width:20%;'>"+dt.uRole+"</td>"
+							+"<td class='texcenter'><input type='radio' name='sel' value='"+dt.id+"'></td>"
+							+"<td>"+dt.loginName+"</td><td style='width:20%;'>"+dt.userName+"</td>"
+							+"<td>"+dt.userSex+"</td>"
+							+"<td>"+dt.fuzz+"</td>"
+							+"<td>"+dt.uRole+"</td>"
 							+"<td>"+dt.deptName+"</td>"
-							+"<td style='width:10%;'>"+dt.userStatu+"</td>"
+							+"<td>"+dt.userStatu+"</td>"
+							+"<td>"+isfilter+"</td>"
 							+"</tr>";
 					}
 					$("#tbody").append(info);

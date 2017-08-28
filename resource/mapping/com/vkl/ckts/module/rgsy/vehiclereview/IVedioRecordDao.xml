@@ -7,7 +7,8 @@
 		VEDIO_URL as "vedioUrl",
 		FW_URL as "fwUrl",
 		INT_URL as "intUrl",
-		VEDIO_ANGLE as "vedioAngle"
+		VEDIO_ANGLE as "vedioAngle",
+		RCK_COUNT   as  "rdkCount"
 	</sql>
 	<!-- 根据流水号查询 -->
 	<select id="findBySrln" resultType="com.vkl.ckts.rgsy.vehiclereview.entity.VedioRecordDto">
@@ -15,7 +16,7 @@
 		<include refid="column"></include> 
 		from VEDIO_RECORD  
 		where srln=#{srln}
-		and RCK_COUNT=#{rdkCount}
+		<!-- and RCK_COUNT=#{rdkCount} -->
 	</select>
 	
 </mapper>

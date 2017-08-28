@@ -352,10 +352,10 @@ dt, dd {
 							</dt>
 							<dd>    <c:choose>
 							       			<c:when test="${vedio.vedioAngle==1 }">
-							       			        查验
+							       			        查验--${vedio.rdkCount }
 							       			</c:when>
 							                <c:otherwise>
-							                                                                    拍照
+							                                                                    拍照--${vedio.rdkCount }
 							                
 							                
 							                </c:otherwise>
