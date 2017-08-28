@@ -499,7 +499,7 @@ dt, dd {
 				  </dt>
 				  <dd>
 				  
-				  <span><%-- <input type="checkbox" name="bpzpPro" value="${list.picId }" class="pics"/> --%></span>  ${list.proName }
+				  <span><input type="checkbox" name="bpzpPro" value="${list.picId }" class="pics"/></span>  ${list.proName }
 				  
 				  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" value="${list.picUrl }" id="printUrl${list.picId}"/>
 				<%--   <span style="font-size: 12px;">打印:</span> 

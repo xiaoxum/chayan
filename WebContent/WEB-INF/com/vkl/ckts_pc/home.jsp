@@ -129,7 +129,7 @@ function changemune2(fcdid,title){
 						</c:choose>
 						</li>
 						<li><div class="list_pople">
-							${userName}
+							<%-- ${userName} --%>
 						</div></li>
 						<li><div class="list_uppwd" onclick="uppwd()" style="cursor:pointer">修改密码</div></li>
 						<li><div class="list_uppwd" onclick="sys()" style="cursor:pointer;display:none;" id="bdsz">本地设置</div></li>
